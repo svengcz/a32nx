@@ -105,7 +105,11 @@ export class NavGeometryProfile extends BaseGeometryProfile {
         this.distanceToPresentPosition = -flightPlanManager.getDistanceToActiveWaypoint();
 
         for (const [i, leg] of legs.entries()) {
-            const legDistance = Geometry.completeLegPathLengths(leg, transitions.get(i - 1), transitions.get(i)).reduce((sum, el) => sum + el, 0);
+            const inboundTransition = transitions.get(i - 1);
+
+            const legDistance = Geometry.completeLegPathLengths(
+                leg, (inboundTransition?.isNull || !inboundTransition?.isComputed) ? null : inboundTransition, transitions.get(i),
+            ).reduce((sum, el) => sum + el, 0);
             this.totalFlightPlanDistance += legDistance;
 
             if (i <= activeLegIndex) {
@@ -159,7 +163,11 @@ export class NavGeometryProfile extends BaseGeometryProfile {
         let totalDistance = 0;
 
         for (const [i, leg] of this.geometry.legs.entries()) {
-            totalDistance += Geometry.completeLegPathLengths(leg, this.geometry.transitions.get(i - 1), this.geometry.transitions.get(i)).reduce((sum, el) => sum + el, 0);
+            const inboundTransition = this.geometry.transitions.get(i - 1);
+
+            totalDistance += Geometry.completeLegPathLengths(
+                leg, (inboundTransition?.isNull || !inboundTransition?.isComputed) ? null : inboundTransition, this.geometry.transitions.get(i),
+            ).reduce((sum, el) => sum + el, 0);
 
             const { secondsFromPresent, altitude, speed } = this.interpolateEverythingFromStart(totalDistance);
 

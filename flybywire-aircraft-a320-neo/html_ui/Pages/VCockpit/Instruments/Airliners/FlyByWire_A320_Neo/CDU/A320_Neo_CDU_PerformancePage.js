@@ -429,6 +429,9 @@ class CDUPerformancePage {
         const actModeCell = isSelected ? "SELECTED" : "MANAGED";
         const costIndexCell = isFinite(mcdu.costIndex) ? mcdu.costIndex.toFixed(0) + "[color]cyan" : "[][color]cyan";
 
+        // Predictions to altitude
+        const vnavDriver = mcdu.guidanceController.vnavDriver;
+
         const cruiseAltitude = mcdu.cruiseFlightLevel * 100;
         const fcuAltitude = SimVar.GetSimVarValue("AUTOPILOT ALTITUDE LOCK VAR:3", "feet");
         const altitudeToPredict = Math.min(cruiseAltitude, fcuAltitude);
@@ -438,23 +441,15 @@ class CDUPerformancePage {
         let predToDistanceCell = "---";
         let predToTimeCell = "----";
 
-        if (mcdu.guidanceController.vnavDriver &&
-            mcdu.guidanceController.vnavDriver.currentNavGeometryProfile &&
-            mcdu.guidanceController.vnavDriver.currentNavGeometryProfile.isReadyToDisplay) {
-            const predictions = mcdu.guidanceController.vnavDriver.currentNavGeometryProfile.computePredictionToFcuAltitude(altitudeToPredict);
+        let expeditePredToDistanceCell = "---";
+        let expeditePredToTimeCell = "----";
 
-            if (predictions) {
-                if (isFinite(predictions.distanceFromStart)) {
-                    predToDistanceCell = predictions.distanceFromStart.toFixed(0) + "[color]green";
-                }
+        if (vnavDriver) {
+            [predToDistanceCell, predToTimeCell] = CDUPerformancePage.getTimeAndDistancePredictionsFromGeometryProfile(vnavDriver.currentNavGeometryProfile, fcuAltitude, mcdu.getIsFlying());
 
-                if (isFinite(predictions.secondsFromPresent)) {
-                    const utcTime = SimVar.GetGlobalVarValue("ZULU TIME", "seconds");
-
-                    predToTimeCell = (mcdu.getIsFlying()
-                        ? FMCMainDisplay.secondsToUTC(utcTime + predictions.secondsFromPresent)
-                        : FMCMainDisplay.minutesTohhmm(predictions.secondsFromPresent)) + "[color]green";
-                }
+            if (isPhaseActive) {
+                const expediteProfile = vnavDriver.computeVerticalProfileForExpediteClimb();
+                [expeditePredToDistanceCell, expeditePredToTimeCell] = CDUPerformancePage.getTimeAndDistancePredictionsFromGeometryProfile(expediteProfile, fcuAltitude, mcdu.getIsFlying(), true);
             }
         }
 
@@ -530,7 +525,7 @@ class CDUPerformancePage {
             ["\xa0" + selectedSpeedTitle],
             ["\xa0" + selectedSpeedCell, isSelected ? predToDistanceCell : "", isSelected ? predToTimeCell : ""],
             [""],
-            [""],
+            isPhaseActive ? ["\xa0{small}EXPEDITE{end}[color]green", expeditePredToDistanceCell, expeditePredToTimeCell] : [""],
             bottomRowLabels,
             bottomRowCells
         ]);
@@ -1133,6 +1128,42 @@ class CDUPerformancePage {
         }
 
         return (10 * Math.round(altitudeToFormat / 10)).toFixed(0).toString().padStart(5,"\xa0");
+    }
+    static getTimeAndDistancePredictionsFromGeometryProfile(geometryProfile, altitudeToPredict, isFlying, printSmall = false) {
+        let predToDistanceCell = "---";
+        let predToTimeCell = "----";
+
+        if (!geometryProfile || !geometryProfile.isReadyToDisplay) {
+            return [predToTimeCell, predToDistanceCell];
+        }
+
+        const predictions = geometryProfile.computePredictionToFcuAltitude(altitudeToPredict);
+
+        if (predictions) {
+            if (isFinite(predictions.distanceFromStart)) {
+                if (printSmall) {
+                    predToDistanceCell = "{small}" + predictions.distanceFromStart.toFixed(0) + "{end}[color]green";
+                } else {
+                    predToDistanceCell = predictions.distanceFromStart.toFixed(0) + "[color]green";
+                }
+            }
+
+            if (isFinite(predictions.secondsFromPresent)) {
+                const utcTime = SimVar.GetGlobalVarValue("ZULU TIME", "seconds");
+
+                const predToTimeCellText = isFlying
+                    ? FMCMainDisplay.secondsToUTC(utcTime + predictions.secondsFromPresent)
+                    : FMCMainDisplay.minutesTohhmm(predictions.secondsFromPresent);
+
+                if (printSmall) {
+                    predToTimeCell = "{small}" + predToTimeCellText + "{end}[color]green";
+                } else {
+                    predToTimeCell = predToTimeCellText + "[color]green";
+                }
+            }
+        }
+
+        return [predToDistanceCell, predToTimeCell];
     }
 }
 CDUPerformancePage._timer = 0;

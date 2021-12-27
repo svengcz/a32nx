@@ -128,3 +128,15 @@ export class ClimbSpeedProfile implements SpeedProfile {
         );
     }
 }
+
+export class ExpediteSpeedProfile implements SpeedProfile {
+    constructor(private greenDotSpeed: Knots) { }
+
+    get(_distanceFromStart: number, _altitude: number): Knots {
+        return this.greenDotSpeed;
+    }
+
+    getCurrentSpeedConstraint(): Knots {
+        return Infinity;
+    }
+}

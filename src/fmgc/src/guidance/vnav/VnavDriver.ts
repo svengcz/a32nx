@@ -12,7 +12,7 @@ import { CruisePathBuilder } from '@fmgc/guidance/vnav/cruise/CruisePathBuilder'
 import { CruiseToDescentCoordinator } from '@fmgc/guidance/vnav/CruiseToDescentCoordinator';
 import { ArmedLateralMode, LateralMode } from '@shared/autopilot';
 import { VnavConfig } from '@fmgc/guidance/vnav/VnavConfig';
-import { ClimbSpeedProfile } from '@fmgc/guidance/vnav/climb/SpeedProfile';
+import { ClimbSpeedProfile, ExpediteSpeedProfile } from '@fmgc/guidance/vnav/climb/SpeedProfile';
 import { SelectedGeometryProfile } from '@fmgc/guidance/vnav/profile/SelectedGeometryProfile';
 import { Geometry } from '../Geometry';
 import { GuidanceComponent } from '../GuidanceComponent';
@@ -152,6 +152,26 @@ export class VnavDriver implements GuidanceComponent {
         if (VnavConfig.DEBUG_PROFILE) {
             console.log(this.currentSelectedGeometryProfile);
         }
+    }
+
+    computeVerticalProfileForExpediteClimb(): SelectedGeometryProfile | undefined {
+        const greenDotSpeed = Simplane.getGreenDotSpeed();
+        if (!greenDotSpeed) {
+            return undefined;
+        }
+
+        const selectedSpeedProfile = new ExpediteSpeedProfile(greenDotSpeed);
+
+        const expediteGeometryProfile = new SelectedGeometryProfile();
+        this.climbPathBuilder.computeClimbPath(expediteGeometryProfile, selectedSpeedProfile);
+
+        expediteGeometryProfile.finalizeProfile();
+
+        if (VnavConfig.DEBUG_PROFILE) {
+            console.log(expediteGeometryProfile);
+        }
+
+        return expediteGeometryProfile;
     }
 
     getCurrentSpeedConstraint() {

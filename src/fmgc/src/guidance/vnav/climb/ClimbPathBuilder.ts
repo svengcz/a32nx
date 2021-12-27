@@ -1,6 +1,6 @@
 import { VerticalProfileComputationParametersObserver } from '@fmgc/guidance/vnav/VerticalProfileComputationParameters';
 import { VerticalMode } from '@shared/autopilot';
-import { ClimbSpeedProfile } from '@fmgc/guidance/vnav/climb/SpeedProfile';
+import { SpeedProfile } from '@fmgc/guidance/vnav/climb/SpeedProfile';
 import { EngineModel } from '../EngineModel';
 import { FlapConf } from '../common';
 import { Predictions, StepResults } from '../Predictions';
@@ -31,29 +31,29 @@ export class ClimbPathBuilder {
 
     private atmosphericConditions: AtmosphericConditions = new AtmosphericConditions();
 
-    constructor(private computationParametersObserver: VerticalProfileComputationParametersObserver, private speedProfile: ClimbSpeedProfile) { }
+    constructor(private computationParametersObserver: VerticalProfileComputationParametersObserver) { }
 
     update() {
         this.atmosphericConditions.update();
     }
 
-    computeClimbPath(profile: BaseGeometryProfile) {
+    computeClimbPath(profile: BaseGeometryProfile, speedProfile: SpeedProfile) {
         const isOnGround = SimVar.GetSimVarValue('SIM ON GROUND', 'Bool');
 
         const { fcuVerticalMode } = this.computationParametersObserver.get();
 
         if (!isOnGround) {
             if (this.verticalModesToComputeProfileFor.includes(fcuVerticalMode)) {
-                this.computeLivePrediction(profile);
+                this.computeLivePrediction(profile, speedProfile);
             }
 
             return;
         }
 
-        this.computePreflightPrediction(profile);
+        this.computePreflightPrediction(profile, speedProfile);
     }
 
-    computePreflightPrediction(profile: BaseGeometryProfile) {
+    computePreflightPrediction(profile: BaseGeometryProfile, speedProfile: SpeedProfile) {
         const { fuelOnBoard, originAirfieldElevation, thrustReductionAltitude, accelerationAltitude, cruiseAltitude, speedLimit, v2Speed } = this.computationParametersObserver.get();
 
         this.addTakeoffRollCheckpoint(profile, fuelOnBoard * ClimbPathBuilder.TONS_TO_POUNDS);
@@ -61,10 +61,10 @@ export class ClimbPathBuilder {
         this.addAccelerationAltitudeStep(profile, thrustReductionAltitude, accelerationAltitude, v2Speed + 10);
 
         if (speedLimit.underAltitude > accelerationAltitude && speedLimit.underAltitude < cruiseAltitude) {
-            this.addClimbSteps(profile, speedLimit.underAltitude, VerticalCheckpointReason.CrossingSpeedLimit);
+            this.addClimbSteps(profile, speedProfile, speedLimit.underAltitude, VerticalCheckpointReason.CrossingSpeedLimit);
         }
 
-        this.addClimbSteps(profile, cruiseAltitude, VerticalCheckpointReason.TopOfClimb);
+        this.addClimbSteps(profile, speedProfile, cruiseAltitude, VerticalCheckpointReason.TopOfClimb);
         this.addSpeedConstraintsAsCheckpoints(profile);
     }
 
@@ -73,15 +73,15 @@ export class ClimbPathBuilder {
      * @param profile
      * @returns
      */
-    computeLivePrediction(profile: BaseGeometryProfile) {
+    computeLivePrediction(profile: BaseGeometryProfile, speedProfile: SpeedProfile) {
         const { presentPosition, cruiseAltitude, speedLimit } = this.computationParametersObserver.get();
 
         this.addPresentPositionCheckpoint(profile, presentPosition.alt);
         if (speedLimit.underAltitude > presentPosition.alt && speedLimit.underAltitude < cruiseAltitude) {
-            this.addClimbSteps(profile, speedLimit.underAltitude, VerticalCheckpointReason.CrossingSpeedLimit);
+            this.addClimbSteps(profile, speedProfile, speedLimit.underAltitude, VerticalCheckpointReason.CrossingSpeedLimit);
         }
 
-        this.addClimbSteps(profile, cruiseAltitude, VerticalCheckpointReason.TopOfClimb);
+        this.addClimbSteps(profile, speedProfile, cruiseAltitude, VerticalCheckpointReason.TopOfClimb);
         this.addSpeedConstraintsAsCheckpoints(profile);
     }
 
@@ -148,7 +148,9 @@ export class ClimbPathBuilder {
         });
     }
 
-    private addClimbSteps(profile: BaseGeometryProfile, finalAltitude: Feet, finalAltitudeReason: VerticalCheckpointReason = VerticalCheckpointReason.AtmosphericConditions) {
+    private addClimbSteps(
+        profile: BaseGeometryProfile, speedProfile: SpeedProfile, finalAltitude: Feet, finalAltitudeReason: VerticalCheckpointReason = VerticalCheckpointReason.AtmosphericConditions,
+    ) {
         const constraints = this.getAltitudeConstraintsForVerticalMode(profile);
 
         for (const constraint of constraints) {
@@ -164,17 +166,17 @@ export class ClimbPathBuilder {
                     profile.lastCheckpoint.reason = VerticalCheckpointReason.ContinueClimb;
                 }
 
-                this.buildIteratedClimbSegment(profile, profile.lastCheckpoint.altitude, constraintAltitude);
+                this.buildIteratedClimbSegment(profile, speedProfile, profile.lastCheckpoint.altitude, constraintAltitude);
 
                 // We reach the target altitude before the constraint, so we insert a level segment.
                 if (profile.lastCheckpoint.distanceFromStart < constraintDistanceFromStart) {
                     profile.lastCheckpoint.reason = VerticalCheckpointReason.LevelOffForConstraint;
 
-                    this.addLevelSegmentSteps(profile, constraintDistanceFromStart);
+                    this.addLevelSegmentSteps(profile, speedProfile, constraintDistanceFromStart);
                 }
             } else if (Math.abs(profile.lastCheckpoint.altitude - constraintAltitude) < 1) {
                 // Continue in level flight to the next constraint
-                this.addLevelSegmentSteps(profile, constraintDistanceFromStart);
+                this.addLevelSegmentSteps(profile, speedProfile, constraintDistanceFromStart);
             }
         }
 
@@ -182,15 +184,15 @@ export class ClimbPathBuilder {
             profile.lastCheckpoint.reason = VerticalCheckpointReason.ContinueClimb;
         }
 
-        this.buildIteratedClimbSegment(profile, profile.lastCheckpoint.altitude, finalAltitude);
+        this.buildIteratedClimbSegment(profile, speedProfile, profile.lastCheckpoint.altitude, finalAltitude);
         profile.lastCheckpoint.reason = finalAltitudeReason;
     }
 
-    private buildIteratedClimbSegment(profile: BaseGeometryProfile, startingAltitude: Feet, targetAltitude: Feet): void {
+    private buildIteratedClimbSegment(profile: BaseGeometryProfile, speedProfile: SpeedProfile, startingAltitude: Feet, targetAltitude: Feet): void {
         for (let altitude = startingAltitude; altitude < targetAltitude; altitude = Math.min(altitude + 1500, targetAltitude)) {
             const lastCheckpoint = profile.lastCheckpoint;
 
-            const climbSpeed = this.speedProfile.get(lastCheckpoint.distanceFromStart, altitude);
+            const climbSpeed = speedProfile.get(lastCheckpoint.distanceFromStart, altitude);
 
             const targetAltitudeForSegment = Math.min(altitude + 1500, targetAltitude);
             const remainingFuelOnBoard = lastCheckpoint.remainingFuelOnBoard;
@@ -203,12 +205,12 @@ export class ClimbPathBuilder {
                 secondsFromPresent: lastCheckpoint.secondsFromPresent + (timeElapsed * 60),
                 altitude: targetAltitudeForSegment,
                 remainingFuelOnBoard: remainingFuelOnBoard - fuelBurned,
-                speed: this.speedProfile.get(lastCheckpoint.distanceFromStart + distanceTraveled, targetAltitudeForSegment),
+                speed: speedProfile.get(lastCheckpoint.distanceFromStart + distanceTraveled, targetAltitudeForSegment),
             });
         }
     }
 
-    private addLevelSegmentSteps(profile: BaseGeometryProfile, toDistanceFromStart: NauticalMiles): void {
+    private addLevelSegmentSteps(profile: BaseGeometryProfile, speedProfile: SpeedProfile, toDistanceFromStart: NauticalMiles): void {
         // The only reason we have to build this iteratively is because there could be speed constraints along the way
         const altitude = profile.lastCheckpoint.altitude;
 
@@ -226,7 +228,7 @@ export class ClimbPathBuilder {
             const { fuelBurned, timeElapsed } = this.computeLevelFlightSegmentPrediction(
                 speedConstraint.distanceFromStart - lastCheckpoint.distanceFromStart,
                 altitude,
-                this.speedProfile.get(lastCheckpoint.distanceFromStart, altitude),
+                speedProfile.get(lastCheckpoint.distanceFromStart, altitude),
                 lastCheckpoint.remainingFuelOnBoard,
             );
 
@@ -236,7 +238,7 @@ export class ClimbPathBuilder {
                 secondsFromPresent: lastCheckpoint.secondsFromPresent + (timeElapsed * 60),
                 altitude,
                 remainingFuelOnBoard: lastCheckpoint.remainingFuelOnBoard - fuelBurned,
-                speed: this.speedProfile.get(speedConstraint.distanceFromStart, altitude),
+                speed: speedProfile.get(speedConstraint.distanceFromStart, altitude),
             });
         }
 
@@ -246,7 +248,7 @@ export class ClimbPathBuilder {
         const { fuelBurned, timeElapsed } = this.computeLevelFlightSegmentPrediction(
             toDistanceFromStart - lastCheckpoint.distanceFromStart,
             altitude,
-            this.speedProfile.get(lastCheckpoint.distanceFromStart, altitude),
+            speedProfile.get(lastCheckpoint.distanceFromStart, altitude),
             lastCheckpoint.remainingFuelOnBoard,
         );
 
@@ -256,7 +258,7 @@ export class ClimbPathBuilder {
             secondsFromPresent: lastCheckpoint.secondsFromPresent + (timeElapsed * 60),
             altitude,
             remainingFuelOnBoard: lastCheckpoint.remainingFuelOnBoard - fuelBurned,
-            speed: this.speedProfile.get(toDistanceFromStart, altitude),
+            speed: speedProfile.get(toDistanceFromStart, altitude),
         });
     }
 
@@ -325,10 +327,6 @@ export class ClimbPathBuilder {
             remainingFuelOnBoard,
             speed: v2Speed + 10, // I know this is not perfectly accurate
         });
-    }
-
-    findMaxSpeedAtDistanceAlongTrack(distanceAlongTrack: NauticalMiles): Knots {
-        return this.speedProfile.findMaxSpeedAtDistanceAlongTrack(distanceAlongTrack);
     }
 
     private addSpeedConstraintsAsCheckpoints(profile: BaseGeometryProfile): void {

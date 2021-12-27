@@ -1097,25 +1097,7 @@ class FMCMainDisplay extends BaseAirliners {
 
     // TODO/VNAV: Speed constraint
     getSpeedConstraint() {
-        const climbPathBuilder = this.guidanceController.vnavDriver.climbPathBuilder;
-        const geometryProfile = this.guidanceController.vnavDriver.currentNavGeometryProfile;
-
-        if (climbPathBuilder && geometryProfile && geometryProfile.distanceToPresentPosition) {
-            return climbPathBuilder.findMaxSpeedAtDistanceAlongTrack(geometryProfile.distanceToPresentPosition);
-        }
-
-        if (DEBUG) {
-            console.warn("[FMS/VNAV] Falling back to default speed prediction");
-        }
-
-        if (this.flightPlanManager.getIsDirectTo()) {
-            return Infinity;
-        }
-        const wpt = this.flightPlanManager.getActiveWaypoint();
-        if (typeof wpt === 'undefined' || !isFinite(wpt.speedConstraint) || wpt.speedConstraint < 100) {
-            return Infinity;
-        }
-        return wpt.speedConstraint;
+        return this.guidanceController.vnavDriver.getCurrentSpeedConstraint();
     }
 
     getClbManagedSpeedFromCostIndex() {

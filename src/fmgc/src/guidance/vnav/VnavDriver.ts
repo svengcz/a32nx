@@ -38,7 +38,7 @@ export class VnavDriver implements GuidanceComponent {
 
     currentApproachProfile: DecelPathCharacteristics;
 
-    climbSpeedProfile: ClimbSpeedProfile;
+    currentClimbSpeedProfile: ClimbSpeedProfile;
 
     timeMarkers = new Map<Seconds, PseudoWaypointFlightPlanInfo | undefined>([
         [10_000, undefined],
@@ -49,9 +49,9 @@ export class VnavDriver implements GuidanceComponent {
         private readonly computationParametersObserver: VerticalProfileComputationParametersObserver,
         private readonly flightPlanManager: FlightPlanManager,
     ) {
-        this.climbSpeedProfile = new ClimbSpeedProfile(this.computationParametersObserver);
+        this.currentClimbSpeedProfile = new ClimbSpeedProfile(this.computationParametersObserver.get(), 0, []);
 
-        this.climbPathBuilder = new ClimbPathBuilder(computationParametersObserver, this.climbSpeedProfile);
+        this.climbPathBuilder = new ClimbPathBuilder(computationParametersObserver);
         this.cruisePathBuilder = new CruisePathBuilder(computationParametersObserver);
         this.descentPathBuilder = new DescentPathBuilder();
         this.decelPathBuilder = new DecelPathBuilder();
@@ -105,12 +105,15 @@ export class VnavDriver implements GuidanceComponent {
     private computeVerticalProfileForNav(geometry: Geometry) {
         console.time('VNAV computation');
         this.currentNavGeometryProfile = new NavGeometryProfile(geometry, this.flightPlanManager, this.guidanceController.activeLegIndex);
-        this.climbSpeedProfile
-            .updateMaxSpeedConstraints(this.currentNavGeometryProfile.maxSpeedConstraints)
-            .updateDistanceAlongTrack(this.currentNavGeometryProfile.distanceToPresentPosition);
+
+        this.currentClimbSpeedProfile = new ClimbSpeedProfile(
+            this.computationParametersObserver.get(),
+            this.currentNavGeometryProfile.distanceToPresentPosition,
+            this.currentNavGeometryProfile.maxSpeedConstraints,
+        );
 
         if (geometry.legs.size > 0 && this.computationParametersObserver.canComputeProfile()) {
-            this.climbPathBuilder.computeClimbPath(this.currentNavGeometryProfile);
+            this.climbPathBuilder.computeClimbPath(this.currentNavGeometryProfile, this.currentClimbSpeedProfile);
 
             if (!this.decelPathBuilder.canCompute(geometry)) {
                 this.cruiseToDescentCoordinator.coordinate(this.currentNavGeometryProfile);
@@ -128,7 +131,7 @@ export class VnavDriver implements GuidanceComponent {
         }
 
         if (VnavConfig.DEBUG_PROFILE) {
-            this.climbSpeedProfile.showDebugStats();
+            this.currentClimbSpeedProfile.showDebugStats();
         }
 
         console.timeEnd('VNAV computation');
@@ -139,16 +142,20 @@ export class VnavDriver implements GuidanceComponent {
             return;
         }
 
-        this.currentSelectedGeometryProfile = new SelectedGeometryProfile();
+        const selectedSpeedProfile = new ClimbSpeedProfile(this.computationParametersObserver.get(), 0, []);
 
-        this.climbSpeedProfile.updateMaxSpeedConstraints([]);
-        this.climbPathBuilder.computeClimbPath(this.currentSelectedGeometryProfile);
+        this.currentSelectedGeometryProfile = new SelectedGeometryProfile();
+        this.climbPathBuilder.computeClimbPath(this.currentSelectedGeometryProfile, selectedSpeedProfile);
 
         this.currentSelectedGeometryProfile.finalizeProfile();
 
         if (VnavConfig.DEBUG_PROFILE) {
             console.log(this.currentSelectedGeometryProfile);
         }
+    }
+
+    getCurrentSpeedConstraint() {
+        return this.currentClimbSpeedProfile.getCurrentSpeedConstraint();
     }
 
     private isInManagedNav(): boolean {

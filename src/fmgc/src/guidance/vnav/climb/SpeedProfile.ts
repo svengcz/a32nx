@@ -1,46 +1,43 @@
 import { MaxSpeedConstraint } from '@fmgc/guidance/vnav/profile/NavGeometryProfile';
-import { VerticalProfileComputationParametersObserver } from '@fmgc/guidance/vnav/VerticalProfileComputationParameters';
+import { SpeedLimit } from '@fmgc/guidance/vnav/SpeedLimit';
+
+interface ClimbSpeedProfileParameters {
+    fcuSpeed: Knots | Mach,
+    managedClimbSpeed: Knots,
+    speedLimit: SpeedLimit,
+    flightPhase: FlightPhase,
+    preselectedClbSpeed: Knots,
+}
+
+export interface SpeedProfile {
+    get(distanceFromStart: NauticalMiles, altitude: Feet): Knots;
+    getCurrentSpeedConstraint(): Knots;
+}
 
 /**
  * This class's purpose is to provide a predicted speed at a given position and altitude.
  */
-export class ClimbSpeedProfile {
+export class ClimbSpeedProfile implements SpeedProfile {
     private maxSpeedCacheHits: number = 0;
 
     private maxSpeedLookups: number = 0;
 
     private maxSpeedCache: Map<number, Knots> = new Map();
 
-    private maxSpeedConstraints: MaxSpeedConstraint[];
-
-    private aircraftDistanceAlongTrack: NauticalMiles
-
-    constructor(private observer: VerticalProfileComputationParametersObserver) { }
-
-    updateMaxSpeedConstraints(maxSpeedConstraints: MaxSpeedConstraint[]): ClimbSpeedProfile {
-        this.maxSpeedConstraints = maxSpeedConstraints;
-
-        this.maxSpeedCacheHits = 0;
-        this.maxSpeedLookups = 0;
-        this.maxSpeedCache.clear();
-
-        return this;
-    }
-
-    updateDistanceAlongTrack(distanceAlongTrack: NauticalMiles): ClimbSpeedProfile {
-        this.aircraftDistanceAlongTrack = distanceAlongTrack;
-
-        return this;
-    }
+    constructor(
+        private parameters: ClimbSpeedProfileParameters,
+        private aircraftDistanceAlongTrack: NauticalMiles,
+        private maxSpeedConstraints: MaxSpeedConstraint[],
+    ) { }
 
     private isValidSpeedLimit(): boolean {
-        const { speed, underAltitude } = this.observer.get().speedLimit;
+        const { speed, underAltitude } = this.parameters.speedLimit;
 
         return Number.isFinite(speed) && Number.isFinite(underAltitude);
     }
 
-    withSpeedLimitIfApplicable(altitude: Feet, fallbackSpeed: Knots): Knots {
-        const { speed, underAltitude } = this.observer.get().speedLimit;
+    private withSpeedLimitIfApplicable(altitude: Feet, fallbackSpeed: Knots): Knots {
+        const { speed, underAltitude } = this.parameters.speedLimit;
 
         if (this.isValidSpeedLimit() && altitude < underAltitude) {
             return Math.min(speed, fallbackSpeed);
@@ -50,7 +47,7 @@ export class ClimbSpeedProfile {
     }
 
     get(distanceFromStart: NauticalMiles, altitude: Feet): Knots {
-        const { fcuSpeed, flightPhase, preselectedClbSpeed } = this.observer.get();
+        const { fcuSpeed, flightPhase, preselectedClbSpeed } = this.parameters;
 
         const hasPreselectedSpeed = flightPhase < FlightPhase.FLIGHT_PHASE_CLIMB && preselectedClbSpeed > 1;
         const hasSelectedSpeed = fcuSpeed > 1;
@@ -72,15 +69,19 @@ export class ClimbSpeedProfile {
         return fcuSpeed;
     }
 
-    getManaged(distanceFromStart: NauticalMiles, altitude: Feet): Knots {
-        let managedClimbSpeed = this.observer.get().managedClimbSpeed;
+    private getManaged(distanceFromStart: NauticalMiles, altitude: Feet): Knots {
+        let managedClimbSpeed = this.parameters.managedClimbSpeed;
 
         managedClimbSpeed = this.withSpeedLimitIfApplicable(altitude, managedClimbSpeed);
 
         return Math.min(managedClimbSpeed, this.findMaxSpeedAtDistanceAlongTrack(distanceFromStart));
     }
 
-    findMaxSpeedAtDistanceAlongTrack(distanceAlongTrack: NauticalMiles): Knots {
+    getCurrentSpeedConstraint(): Knots {
+        return this.findMaxSpeedAtDistanceAlongTrack(this.aircraftDistanceAlongTrack);
+    }
+
+    private findMaxSpeedAtDistanceAlongTrack(distanceAlongTrack: NauticalMiles): Knots {
         this.maxSpeedLookups++;
 
         const cachedMaxSpeed = this.maxSpeedCache.get(distanceAlongTrack);

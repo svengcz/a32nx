@@ -301,7 +301,7 @@ export class Geometry {
         const outboundTransition = this.transitions.get(activeLegIdx);
 
         // Restrict sequencing in cases where we are still in inbound transition. Make an exception for very short legs as the transition could be overshooting.
-        if (inboundTransition?.isAbeam(ppos) && activeLeg.distance > 0.01) {
+        if (!inboundTransition?.isNull && inboundTransition?.isAbeam(ppos) && activeLeg.distance > 0.01) {
             return false;
         }
 

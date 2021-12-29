@@ -338,7 +338,7 @@ export class ClimbPathBuilder {
     private getAltitudeConstraintsForVerticalMode(profile: BaseGeometryProfile): MaxAltitudeConstraint[] {
         const { fcuVerticalMode, flightPhase } = this.computationParametersObserver.get();
 
-        if (flightPhase === FlightPhase.FLIGHT_PHASE_PREFLIGHT
+        if (flightPhase < FlightPhase.FLIGHT_PHASE_CLIMB
             || this.verticalModesToApplyAltitudeConstraintsFor.includes(fcuVerticalMode)
         ) {
             return profile.maxAltitudeConstraints;

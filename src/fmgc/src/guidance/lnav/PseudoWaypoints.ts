@@ -163,6 +163,27 @@ export class PseudoWaypoints implements GuidanceComponent {
             });
         }
 
+        // This is probably not gonna stay here, just to try things out
+        const fcuAltitudeCheckpoint = geometryProfile.findVerticalCheckpoint(VerticalCheckpointReason.CrossingFcuAltitude);
+        const fcuAltitude = PseudoWaypoints.pointFromEndOfPath(geometry, wptCount, totalDistance - fcuAltitudeCheckpoint?.distanceFromStart);
+
+        if (fcuAltitude) {
+            const [efisSymbolLla, distanceFromLegTermination, alongLegIndex] = fcuAltitude;
+
+            newPseudoWaypoints.push({
+                ident: 'FCU alt',
+                alongLegIndex,
+                distanceFromLegTermination,
+                efisSymbolFlag: NdSymbolTypeFlags.PwpTopOfClimb,
+                efisSymbolLla,
+                displayedOnMcdu: false,
+                flightPlanInfo: {
+                    ...tocCheckpoint,
+                    distanceFromLastFix: PseudoWaypoints.computePseudoWaypointDistanceFromFix(geometry.legs.get(alongLegIndex), distanceFromLegTermination),
+                },
+            });
+        }
+
         // Time Markers
         for (const [time, prediction] of this.guidanceController.vnavDriver.timeMarkers.entries()) {
             if (prediction) {

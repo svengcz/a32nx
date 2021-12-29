@@ -66,6 +66,7 @@ export class ClimbPathBuilder {
 
         this.addClimbSteps(profile, speedProfile, cruiseAltitude, VerticalCheckpointReason.TopOfClimb);
         this.addSpeedConstraintsAsCheckpoints(profile);
+        this.addFcuAltitudeAsCheckpoint(profile);
     }
 
     /**
@@ -83,6 +84,7 @@ export class ClimbPathBuilder {
 
         this.addClimbSteps(profile, speedProfile, cruiseAltitude, VerticalCheckpointReason.TopOfClimb);
         this.addSpeedConstraintsAsCheckpoints(profile);
+        this.addFcuAltitudeAsCheckpoint(profile);
     }
 
     private addPresentPositionCheckpoint(profile: BaseGeometryProfile, altitude: Feet) {
@@ -331,8 +333,20 @@ export class ClimbPathBuilder {
 
     private addSpeedConstraintsAsCheckpoints(profile: BaseGeometryProfile): void {
         for (const { distanceFromStart, maxSpeed } of profile.maxSpeedConstraints) {
-            profile.addSpeedCheckpoint(distanceFromStart, maxSpeed, VerticalCheckpointReason.SpeedConstraint);
+            profile.addInterpolatedCheckpoint(distanceFromStart, { reason: VerticalCheckpointReason.SpeedConstraint, speed: maxSpeed });
         }
+    }
+
+    private addFcuAltitudeAsCheckpoint(profile: BaseGeometryProfile) {
+        const { fcuAltitude, presentPosition, cruiseAltitude } = this.computationParametersObserver.get();
+
+        if (fcuAltitude <= presentPosition.alt || fcuAltitude > cruiseAltitude) {
+            return;
+        }
+
+        const distance = profile.interpolateDistanceAtAltitude(fcuAltitude);
+
+        profile.addInterpolatedCheckpoint(distance, { reason: VerticalCheckpointReason.CrossingFcuAltitude });
     }
 
     private getAltitudeConstraintsForVerticalMode(profile: BaseGeometryProfile): MaxAltitudeConstraint[] {

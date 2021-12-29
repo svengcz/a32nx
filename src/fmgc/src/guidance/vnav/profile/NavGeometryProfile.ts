@@ -30,6 +30,7 @@ export enum VerticalCheckpointReason {
     ContinueClimb = 'ContinueClimb',
     CrossingSpeedLimit = 'CrossingSpeedLimit',
     SpeedConstraint = 'SpeedConstraint',
+    CrossingFcuAltitude = 'FcuAltitude',
 
     // Descent
     TopOfDescent = 'TopOfDescent',

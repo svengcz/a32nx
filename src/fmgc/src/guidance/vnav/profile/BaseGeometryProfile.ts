@@ -143,6 +143,10 @@ export abstract class BaseGeometryProfile {
         };
     }
 
+    interpolateDistanceAtAltitude(altitude: Feet): NauticalMiles {
+        return this.interpolateFromCheckpoints(altitude, (checkpoint) => checkpoint.altitude, (checkpoint) => checkpoint.distanceFromStart);
+    }
+
     findVerticalCheckpoint(reason: VerticalCheckpointReason): VerticalCheckpoint | undefined {
         return this.checkpoints.find((checkpoint) => checkpoint.reason === reason);
     }
@@ -178,8 +182,61 @@ export abstract class BaseGeometryProfile {
         return result;
     }
 
-    addSpeedCheckpoint(distanceFromStart: NauticalMiles, speed: Knots, reason: VerticalCheckpointReason) {
-        this.checkpoints.push({ ...this.interpolateEverythingFromStart(distanceFromStart), speed, reason });
+    addInterpolatedCheckpoint(distanceFromStart: NauticalMiles, additionalProperties: HasAtLeast<VerticalCheckpoint, 'reason'>) {
+        if (distanceFromStart <= this.checkpoints[0].distanceFromStart) {
+            this.checkpoints.unshift({
+                distanceFromStart,
+                secondsFromPresent: this.checkpoints[0].secondsFromPresent,
+                altitude: this.checkpoints[0].altitude,
+                remainingFuelOnBoard: this.checkpoints[0].remainingFuelOnBoard,
+                speed: this.checkpoints[0].speed,
+                ...additionalProperties,
+            });
+
+            return;
+        }
+
+        for (let i = 0; i < this.checkpoints.length - 1; i++) {
+            if (distanceFromStart > this.checkpoints[i].distanceFromStart && distanceFromStart <= this.checkpoints[i + 1].distanceFromStart) {
+                this.checkpoints.splice(i, 0, {
+                    distanceFromStart,
+                    secondsFromPresent: Common.interpolate(
+                        distanceFromStart,
+                        this.checkpoints[i].distanceFromStart,
+                        this.checkpoints[i + 1].distanceFromStart,
+                        this.checkpoints[i].secondsFromPresent,
+                        this.checkpoints[i + 1].secondsFromPresent,
+                    ),
+                    altitude: Common.interpolate(
+                        distanceFromStart,
+                        this.checkpoints[i].distanceFromStart,
+                        this.checkpoints[i + 1].distanceFromStart,
+                        this.checkpoints[i].altitude,
+                        this.checkpoints[i + 1].altitude,
+                    ),
+                    remainingFuelOnBoard: Common.interpolate(
+                        distanceFromStart,
+                        this.checkpoints[i].distanceFromStart,
+                        this.checkpoints[i + 1].distanceFromStart,
+                        this.checkpoints[i].remainingFuelOnBoard,
+                        this.checkpoints[i + 1].remainingFuelOnBoard,
+                    ),
+                    speed: this.checkpoints[i + 1].speed,
+                    ...additionalProperties,
+                });
+
+                return;
+            }
+        }
+
+        this.checkpoints.push({
+            distanceFromStart,
+            secondsFromPresent: this.lastCheckpoint.secondsFromPresent,
+            altitude: this.lastCheckpoint.altitude,
+            remainingFuelOnBoard: this.lastCheckpoint.remainingFuelOnBoard,
+            speed: this.lastCheckpoint.speed,
+            ...additionalProperties,
+        });
     }
 
     finalizeProfile() {
@@ -203,3 +260,5 @@ export abstract class BaseGeometryProfile {
         };
     }
 }
+
+type HasAtLeast<T, U extends keyof T> = Pick<T, U> & Partial<Omit<T, U>>

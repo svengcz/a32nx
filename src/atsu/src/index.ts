@@ -11,6 +11,7 @@ import { TafMessage } from './messages/TafMessage';
 import { AtisMessage } from './messages/AtisMessage';
 import { AocSystem } from './AocSystem';
 import { AtcSystem } from './AtcSystem';
+import { DclMessage } from './messages/DclMessage';
 
 export {
     AtsuStatusCodes,
@@ -32,4 +33,5 @@ export {
     AtisMessage,
     AocSystem,
     AtcSystem,
+    DclMessage,
 };

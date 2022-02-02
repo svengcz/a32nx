@@ -5,7 +5,7 @@ class CDUAtcMenu {
         mcdu.setTemplate([
             ["ATC MENU", "1", "2"],
             [""],
-            ["<LAT REQ[color]inop", "VERT REQ>[color]inop"],
+            ["<LAT REQ[color]white", "VERT REQ>[color]inop"],
             [""],
             ["<WHEN CAN WE[color]inop", "OTHER REQ>[color]inop"],
             [""],
@@ -22,7 +22,7 @@ class CDUAtcMenu {
             return mcdu.getDelaySwitchPage();
         };
         mcdu.onLeftInput[0] = () => {
-            //CDUAtcRequest.ShowPage(mcdu);
+            CDUAtcLatRequest.ShowPage(mcdu);
         };
 
         mcdu.leftInputDelay[3] = () => {

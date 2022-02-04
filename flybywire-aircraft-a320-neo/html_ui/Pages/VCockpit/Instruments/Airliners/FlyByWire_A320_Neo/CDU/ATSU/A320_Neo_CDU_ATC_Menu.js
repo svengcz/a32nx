@@ -9,7 +9,7 @@ class CDUAtcMenu {
             [""],
             ["<WHEN CAN WE[color]inop", "OTHER REQ>[color]inop"],
             [""],
-            ["", "TEXT>[color]inop"],
+            ["", "TEXT>[color]white"],
             [""],
             ["<MSG RECORD", "REPORTS>[color]inop"],
             [""],
@@ -44,6 +44,13 @@ class CDUAtcMenu {
         };
         mcdu.onLeftInput[5] = () => {
             CDUAtsuMenu.ShowPage(mcdu);
+        };
+
+        mcdu.rightInputDelay[2] = () => {
+            return mcdu.getDelaySwitchPage();
+        };
+        mcdu.onRightInput[2] = () => {
+            CDUAtcText.ShowPage1(mcdu);
         };
 
         mcdu.rightInputDelay[3] = () => {

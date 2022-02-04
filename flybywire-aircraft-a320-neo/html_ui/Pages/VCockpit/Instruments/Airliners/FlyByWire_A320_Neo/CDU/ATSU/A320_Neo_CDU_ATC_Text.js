@@ -22,7 +22,7 @@ class CDUAtcText {
 
         let freetext = "[\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0][color]cyan";
         if (mcdu.requestMessage.Freetext0 !== "") {
-            freetext = mcdu.RequestMessage.Freetext0;
+            freetext = mcdu.requestMessage.Freetext0;
         }
 
         mcdu.setTemplate([
@@ -96,7 +96,7 @@ class CDUAtcText {
         };
         mcdu.onLeftInput[5] = () => {
             mcdu.requestMessage = undefined;
-            CDUAtcMenu.ShowPage(mcdu);
+            CDUAtcMenu.ShowPage1(mcdu);
         };
 
         mcdu.rightInputDelay[0] = () => {

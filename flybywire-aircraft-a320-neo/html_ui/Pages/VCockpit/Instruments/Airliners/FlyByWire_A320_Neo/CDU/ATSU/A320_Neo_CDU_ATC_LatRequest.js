@@ -33,11 +33,11 @@ class CDUAtcLatRequest {
         } else if (sid) {
             mcdu.requestMessage.Request = `REQUEST ${wxDev} ROUTE`;
         } else if (offset) {
-            mcdu.requestMessage.Request = `REQUEST ${CDUAtcLatRequest.TranslateOffset(wxDev)} OF ROUTE STARTING `;
+            mcdu.requestMessage.Request = `REQUEST ${CDUAtcLatRequest.TranslateOffset(offset)} OF ROUTE START `;
             if (offsetStart) {
-                mcdu.requestMessage.Request = ` AT ${offsetStart}`;
+                mcdu.requestMessage.Request += ` AT ${offsetStart}`;
             } else {
-                mcdu.requestMessage.Request = ` NOW [${(new Atsu.AtsuTimestamp()).dcduTimestamp()}]`;
+                mcdu.requestMessage.Request += ` NOW [${(new Atsu.AtsuTimestamp()).dcduTimestamp()}]`;
             }
         } else if (hdg) {
             if (hdg === 0) {

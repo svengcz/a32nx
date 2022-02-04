@@ -2244,6 +2244,62 @@ class FMCMainDisplay extends BaseAirliners {
         }
     }
 
+    /*
+     * validates the waypoint type
+     * return values:
+     *    0 = lat-lon coordinate
+     *    1 = time
+     *    2 = place definition
+     *   -1 = unknown
+     */
+    async waypointType(mcdu, waypoint) {
+        if (mcdu.isLatLonFormat(waypoint)) {
+            return 0;
+        }
+
+        // time formatted
+        if (/([0-2][0-4][0-5][0-9]Z?)/.test(waypoint) && waypoint.length <= 5) {
+            return 1;
+        }
+
+        // place formatted
+        if (/^[A-Z0-9]{2,7}/.test(waypoint)) {
+            return mcdu.dataManager.GetWaypointsByIdent.bind(mcdu.dataManager)(waypoint).then((waypoints) => {
+                if (waypoints.length !== 0) {
+                    return 2;
+                } else {
+                    return -1;
+                }
+            });
+        }
+
+        return -1;
+    }
+
+    validOffset(offset) {
+        let nmUnit = true;
+        let distance = 0;
+
+        if (/[LR][0-9]{1,3}(NM|KM)/.test(offset) || /[LR][0-9]{1,3}/.test(offset)) {
+            // format: DNNNKM, DNNNNM, DNNN
+            distance = parseInt(offset.substring(1, 4));
+            nmUnit = !offset.endsWith("KM");
+        } else if (/[0-9]{1,3}(NM|KM)[LR]/.test(offset) || /[0-9]{1,3}[LR]/.test(offset)) {
+            // format: NNNKMD, NNNNMD, NNND
+            distance = parseInt(offset.substring(0, 3));
+            nmUnit = !(offset.endsWith("KML") || offset.endsWith("KMR"));
+        } else {
+            return false;
+        }
+
+        // validate the ranges
+        if (nmUnit) {
+            return distance >= 1 && distance <= 128;
+        } else {
+            return distance >= 1 && distance <= 256;
+        }
+    }
+
     vSpeedsValid() {
         return this._v1Checked && this._vRChecked && this._v2Checked ? (
             (!!this.v1Speed && !!this.vRSpeed ? this.v1Speed <= this.vRSpeed : true)

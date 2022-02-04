@@ -64,9 +64,6 @@ class CDUAtcLatRequest {
         if (mcdu.requestMessage !== undefined && !dataSet) {
             mcdu.requestMessage = undefined;
         }
-        if (mcdu.requestMessage === undefined && dataSet) {
-            CDUAtcLatRequest.CreateMessage(mcdu, dir, wxDev, sid, offset, offsetStart, hdg, trk, backOnTrack);
-        }
 
         const wheaterDeviation = new CDU_SingleValueField(mcdu,
             "string",
@@ -261,7 +258,6 @@ class CDUAtcLatRequest {
             return mcdu.getDelaySwitchPage();
         };
         mcdu.onLeftInput[4] = () => {
-            mcdu.requestMessage = undefined;
             CDUAtcLatRequest.ShowPage(mcdu, null, null, null, null, null, null, null, false, false);
         };
 
@@ -332,6 +328,9 @@ class CDUAtcLatRequest {
             return mcdu.getDelaySwitchPage();
         };
         mcdu.onRightInput[4] = () => {
+            if (dataSet) {
+                CDUAtcLatRequest.CreateMessage(mcdu, dir, wxDev, sid, offset, offsetStart, hdg, trk, backOnTrack);
+            }
             CDUAtcText.ShowPage1(mcdu, "REQ");
         };
 
@@ -339,9 +338,12 @@ class CDUAtcLatRequest {
             return mcdu.getDelaySwitchPage();
         };
         mcdu.onRightInput[5] = () => {
-            mcdu.atsuManager.registerMessage(mcdu.requestMessage);
-            mcdu.requestMessage = undefined;
-            CDUAtcLatRequest.ShowPage(mcdu, null, null, null, null, null, null, null, false, false);
+            if (dataSet) {
+                CDUAtcLatRequest.CreateMessage(mcdu, dir, wxDev, sid, offset, offsetStart, hdg, trk, backOnTrack);
+                mcdu.atsuManager.registerMessage(mcdu.requestMessage);
+                mcdu.requestMessage = undefined;
+                CDUAtcLatRequest.ShowPage(mcdu, null, null, null, null, null, null, null, false, false);
+            }
         };
     }
 }

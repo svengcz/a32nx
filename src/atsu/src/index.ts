@@ -13,6 +13,7 @@ import { AocSystem } from './AocSystem';
 import { AtcSystem } from './AtcSystem';
 import { DclMessage } from './messages/DclMessage';
 import { OclMessage } from './messages/OclMessage';
+import { RequestMessage } from './messages/RequestMessage';
 
 export {
     AtsuStatusCodes,
@@ -36,4 +37,5 @@ export {
     AtcSystem,
     DclMessage,
     OclMessage,
+    RequestMessage,
 };

@@ -37,6 +37,7 @@ export const OutputButtons: React.FC<OutputButtonsProps> = ({ message, setStatus
         if (showAnswers) {
             if (index === 'L1') {
                 SimVar.SetSimVarValue('L:A32NX_DCDU_MSG_DELETE_UID', 'number', message.UniqueMessageID);
+                closeMessage(message.UniqueMessageID);
             } else if (index === 'R2') {
                 if (SimVar.GetSimVarValue('L:A32NX_DCDU_MSG_SEND_UID', 'number') === -1) {
                     SimVar.SetSimVarValue('L:A32NX_DCDU_MSG_SEND_UID', 'number', message.UniqueMessageID);

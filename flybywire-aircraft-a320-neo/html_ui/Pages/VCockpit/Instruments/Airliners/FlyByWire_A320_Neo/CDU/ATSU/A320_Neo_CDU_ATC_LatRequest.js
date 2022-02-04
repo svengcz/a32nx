@@ -278,7 +278,10 @@ class CDUAtcLatRequest {
                 offset = null;
                 offsetStart = null;
             } else {
+                let updatedOffset = false;
+
                 if (mcdu.validOffset(entries[0])) {
+                    updatedOffset = true;
                     offset = entries[0];
                     entries.shift();
                 }
@@ -304,6 +307,10 @@ class CDUAtcLatRequest {
                                     break;
                                 default:
                                     mcdu.addNewMessage(NXSystemMessages.formatError);
+                                    offsetStart = null;
+                                    if (updatedOffset) {
+                                        offset = null;
+                                    }
                                     break;
                             }
                         }

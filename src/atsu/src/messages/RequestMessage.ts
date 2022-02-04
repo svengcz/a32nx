@@ -49,7 +49,7 @@ export class RequestMessage extends CpdlcMessage {
             this.Freetext4,
         ];
         freetext = freetext.filter((n) => n);
-        content += freetext.join(' ');
+        content += ` ${freetext.join(' ')}`;
         const lines = wordWrap(content, 25);
 
         if (format === AtsuMessageSerializationFormat.Network) {

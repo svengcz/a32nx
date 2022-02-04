@@ -145,6 +145,7 @@
 1. [DCDU] Increase DCDU size and use new DCDU font - @svengcz (Sven Czarnian)
 1. [AP] Fix: adjustment of vertical speed limitation in SPD/MACH law - @IbrahimK42 (IbrahimK42)
 1. [MISC] Animation speed/behaviors for button, switches and knobs - @bouveng (Johan Bouveng)
+1. [MCDU] Added automated ATIS updates and interpretation - @svengcz (Sven Czarnian)
 
 ## 0.7.0
 

@@ -90,17 +90,19 @@ class A320_Neo_CDU_MainDisplay extends FMCMainDisplay {
             ATCDepartReq: 55,
             ATCOceanicReq: 56,
             ATCAtis: 57,
-            ATCMessages: 58,
-            ATCReports: 59,
-            ATCPositionReport: 60,
-            ATCMessageModify: 61,
-            ATCConnection: 62,
-            ATCNotification: 63,
-            ATCConnectionStatus: 64,
-            ClimbWind: 65,
-            CruiseWind: 66,
-            DescentWind: 67,
-            FixInfoPage: 68,
+            ATCAtisAutoUpdate: 58,
+            ATCAtisView: 59,
+            ATCMessages: 60,
+            ATCReports: 61,
+            ATCPositionReport: 62,
+            ATCMessageModify: 63,
+            ATCConnection: 64,
+            ATCNotification: 65,
+            ATCConnectionStatus: 66,
+            ClimbWind: 67,
+            CruiseWind: 68,
+            DescentWind: 69,
+            FixInfoPage: 70,
         };
     }
 
@@ -984,6 +986,12 @@ class A320_Neo_CDU_MainDisplay extends FMCMainDisplay {
                 break;
             case Atsu.AtsuStatusCodes.SystemBusy:
                 this.addNewMessage(NXSystemMessages.systemBusy);
+                break;
+            case Atsu.AtsuStatusCodes.NewAtisReceived:
+                this.addNewMessage(NXSystemMessages.newAtisReceived);
+                break;
+            case Atsu.AtsuStatusCodes.NoAtisReceived:
+                this.addNewMessage(NXSystemMessages.noAtisReceived);
                 break;
             default:
                 break;

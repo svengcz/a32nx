@@ -5,7 +5,7 @@ import { Datalink } from './com/Datalink';
 import { AtsuStatusCodes } from './AtsuStatusCodes';
 import { AtcSystem } from './AtcSystem';
 import { AocSystem } from './AocSystem';
-import { AtsuMessage, AtsuMessageSerializationFormat, AtsuMessageComStatus } from './messages/AtsuMessage';
+import { AtsuMessage, AtsuMessageSerializationFormat } from './messages/AtsuMessage';
 import { AtsuTimestamp } from './messages/AtsuTimestamp';
 
 /**
@@ -100,11 +100,6 @@ export class AtsuManager {
         if (AocSystem.isRelevantMessage(message)) {
             this.aoc.insertMessage(message);
         } else if (AtcSystem.isRelevantMessage(message)) {
-            if (message.ComStatus !== AtsuMessageComStatus.Sending && message.ComStatus !== AtsuMessageComStatus.Sent) {
-                if (SimVar.GetSimVarValue('L:A32NX_DCDU_MSG_MAX_REACHED', 'boolean') === 1) {
-                    this.mcdu.addNewAtsuMessage(AtsuStatusCodes.DcduFull);
-                }
-            }
             this.atc.insertMessage(message);
         }
     }
@@ -112,6 +107,10 @@ export class AtsuManager {
     public messageRead(uid: number): void {
         this.aoc.messageRead(uid);
         this.atc.messageRead(uid);
+    }
+
+    public publishAtsuStatusCode(code: AtsuStatusCodes): void {
+        this.mcdu.addNewAtsuMessage(code);
     }
 
     public async isRemoteStationAvailable(callsign: string): Promise<AtsuStatusCodes> {

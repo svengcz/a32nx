@@ -226,6 +226,27 @@ class CDUAtcVertRequest {
         CDUAtcVertRequest.ShowPage1(mcdu, data);
     }
 
+    static SameAltitudeType(first, second) {
+        if (first.startsWith("FL") && second.startsWith("FL")) {
+            return true;
+        } else if (first.startsWith("FL") || second.startsWith("FL")) {
+            return false;
+        } else if ((first[first.length - 1] === "M" && second[second.length - 1] === "M") || (first[first.length - 1] !== "M" && second[second.length - 1] !== "M")) {
+            return true;
+        }
+        return false;
+    }
+
+    static ConvertToFeet(value) {
+        if (value.startsWith("FL")) {
+            return parseInt(value.substring(2, value.length)) * 100;
+        } else if (value[value.length - 1] === "M") {
+            return parseInt(value.substring(0, value.length - 1)) * 3.28;
+        } else {
+            return parseInt(value);
+        }
+    }
+
     static ShowPage1(mcdu, data = CDUAtcVertRequest.CreateDataBlock()) {
         mcdu.clearDisplay();
 
@@ -439,6 +460,46 @@ class CDUAtcVertRequest {
             ["\xa0ATC MENU", "ATC\xa0[color]cyan"],
             ["<RETURN", "REQ DISPLAY\xa0[color]cyan"]
         ]);
+
+        mcdu.leftInputDelay[0] = () => {
+            return mcdu.getDelaySwitchPage();
+        };
+        mcdu.onLeftInput[0] = (value) => {
+            if (value === FMCMainDisplay.clrValue) {
+                data.blockAltLow = null;
+                data.blockAltHigh = null;
+            } else if (value) {
+                const entries = value.split("/");
+                if (entries.length !== 2) {
+                    mcdu.addNewMessage(NXSystemMessages.formatError);
+                } else if (CDUAtcVertRequest.ValidateAltitude(entries[0]) || CDUAtcVertRequest.ValidateAltitude(entries[1])) {
+                    let error = CDUAtcVertRequest.ValidateAltitude(entries[0]);
+                    if (error) {
+                        mcdu.addNewMessage(error);
+                    } else {
+                        error = CDUAtcVertRequest.ValidateAltitude(entries[1]);
+                        mcdu.addNewMessage(error);
+                    }
+                } else {
+                    const lowerStr = CDUAtcVertRequest.FormatAltitude(entries[0]);
+                    const higherStr = CDUAtcVertRequest.FormatAltitude(entries[1]);
+                    const lower = CDUAtcVertRequest.ConvertToFeet(lowerStr);
+                    const higher = CDUAtcVertRequest.ConvertToFeet(higherStr);
+
+                    if (!CDUAtcVertRequest.SameAltitudeType(lowerStr, higherStr)) {
+                        mcdu.addNewMessage(NXSystemMessages.formatError);
+                    } else if (lower >= higher) {
+                        mcdu.addNewMessage(NXSystemMessages.entryOutOfRange);
+                    } else {
+                        data = CDUAtcVertRequest.CreateDataBlock();
+                        data.blockAltLow = lowerStr;
+                        data.blockAltHigh = higherStr;
+                    }
+                }
+            }
+
+            CDUAtcVertRequest.ShowPage2(mcdu, data);
+        };
 
         mcdu.leftInputDelay[4] = () => {
             return mcdu.getDelaySwitchPage();

@@ -225,9 +225,10 @@ class CDUAtcVertRequest {
         CDUAtcVertRequest.ShowPage1(mcdu, data);
     }
 
+    static ShowPage1(mcdu, data = CDUAtcVertRequest.CreateDataBlock()) {
         mcdu.clearDisplay();
 
-        if (mcdu.requestMessage !== undefined && !dataSet) {
+        if (mcdu.requestMessage !== undefined) {
             mcdu.requestMessage = undefined;
         }
 
@@ -251,7 +252,7 @@ class CDUAtcVertRequest {
             return mcdu.getDelaySwitchPage();
         };
         mcdu.onLeftInput[4] = () => {
-            CDUAtcVertRequest.ShowPage1(mcdu, false);
+            CDUAtcVertRequest.ShowPage1(mcdu);
         };
 
         mcdu.leftInputDelay[5] = () => {
@@ -281,19 +282,19 @@ class CDUAtcVertRequest {
                 //CDUAtcLatRequest.CreateMessage(mcdu, dir, wxDev, sid, offset, offsetStart, hdg, trk, backOnTrack);
                 mcdu.atsuManager.registerMessage(mcdu.requestMessage);
                 mcdu.requestMessage = undefined;
-                CDUAtcVertRequest.ShowPage1(mcdu, false);
+                CDUAtcVertRequest.ShowPage1(mcdu);
             }
         };
 
         mcdu.onNextPage = () => {
-            CDUAtcVertRequest.ShowPage2(mcdu, parent, false);
+            CDUAtcVertRequest.ShowPage2(mcdu, data);
         };
     }
 
-    static ShowPage2(mcdu, dataSet = false) {
+    static ShowPage2(mcdu, data = CDUAtcVertRequest.CreateDataBlock()) {
         mcdu.clearDisplay();
 
-        if (mcdu.requestMessage !== undefined && !dataSet) {
+        if (mcdu.requestMessage !== undefined) {
             mcdu.requestMessage = undefined;
         }
 
@@ -352,7 +353,7 @@ class CDUAtcVertRequest {
         };
 
         mcdu.onPrevPage = () => {
-            CDUAtcVertRequest.ShowPage1(mcdu, parent, false);
+            CDUAtcVertRequest.ShowPage1(mcdu, data);
         };
     }
 }

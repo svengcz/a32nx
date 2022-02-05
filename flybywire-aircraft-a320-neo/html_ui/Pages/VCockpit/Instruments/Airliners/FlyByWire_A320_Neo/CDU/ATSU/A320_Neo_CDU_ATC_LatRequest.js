@@ -6,11 +6,23 @@ class CDUAtcLatRequest {
 
         if (/[LR][0-9]{1,3}(NM|KM)/.test(offset) || /[LR][0-9]{1,3}/.test(offset)) {
             // format: DNNNKM, DNNNNM, DNNN
+
+            // contains not only numbers
+            if (/(?!^\d+$)^.+$/.test(offset.substring(1, 4))) {
+                return false;
+            }
+
             distance = parseInt(offset.substring(1, 4));
             nmUnit = !offset.endsWith("KM");
             left = offset[0] === 'L';
         } else if (/[0-9]{1,3}(NM|KM)[LR]/.test(offset) || /[0-9]{1,3}[LR]/.test(offset)) {
             // format: NNNKMD, NNNNMD, NNND
+
+            // contains not only numbers
+            if (/(?!^\d+$)^.+$/.test(offset.substring(0, 3))) {
+                return false;
+            }
+
             distance = parseInt(offset.substring(0, 3));
             nmUnit = !(offset.endsWith("KML") || offset.endsWith("KMR"));
             left = offset[offset.length - 1] === 'L';

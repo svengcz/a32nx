@@ -304,7 +304,7 @@ class CDUAtcLatRequest {
 
                     mcdu.waypointType(mcdu, startingPoint).then((type) => {
                         if (offset) {
-                            switch (type) {
+                            switch (type[0]) {
                                 case 0:
                                     offsetStart = startingPoint;
                                     break;
@@ -319,7 +319,7 @@ class CDUAtcLatRequest {
                                     offsetStart = startingPoint;
                                     break;
                                 default:
-                                    mcdu.addNewMessage(NXSystemMessages.formatError);
+                                    mcdu.addNewMessage(type[1]);
                                     offsetStart = null;
                                     if (updatedOffset) {
                                         offset = null;

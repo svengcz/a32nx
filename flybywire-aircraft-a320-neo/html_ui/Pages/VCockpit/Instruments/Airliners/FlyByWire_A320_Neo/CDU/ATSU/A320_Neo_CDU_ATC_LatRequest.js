@@ -339,7 +339,7 @@ class CDUAtcLatRequest {
             if (dataSet) {
                 CDUAtcLatRequest.CreateMessage(mcdu, dir, wxDev, sid, offset, offsetStart, hdg, trk, backOnTrack);
             }
-            CDUAtcText.ShowPage1(mcdu, "REQ");
+            CDUAtcText.ShowPage1(mcdu, "REQ", false);
         };
 
         mcdu.rightInputDelay[5] = () => {

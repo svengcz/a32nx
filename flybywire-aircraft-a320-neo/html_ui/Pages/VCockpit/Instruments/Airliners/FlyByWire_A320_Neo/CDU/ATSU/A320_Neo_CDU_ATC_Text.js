@@ -12,15 +12,16 @@ class CDUAtcText {
         return mcdu.requestMessage.Freetext3 !== "" || mcdu.requestMessage.Freetext4 !== "";
     }
 
-    static ShowPage1(mcdu, parent = null, perf = false, med = false, wx = false, tech = false, turb = false, disc = false) {
+    static ShowPage1(mcdu, parent = null, firstCall = true) {
         mcdu.clearDisplay();
 
-        let send = false;
-        if (parent || perf || med || wx || tech || turb || disc || CDUAtcText.SendableMessage(mcdu)) {
-            send = true;
-        }
-        if (mcdu.requestMessage === undefined) {
+        if (firstCall || mcdu.requestMessage === undefined) {
             mcdu.requestMessage = new Atsu.RequestMessage();
+        }
+
+        let send = false;
+        if (CDUAtcText.SendableMessage(mcdu)) {
+            send = true;
         }
 
         let freetext = "[\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0][color]cyan";
@@ -29,7 +30,7 @@ class CDUAtcText {
         }
 
         mcdu.setTemplate([
-            ["TEXT", "1", "2}"],
+            ["TEXT", "1", "2"],
             ["\xa0DUE TO", "DUE TO\xa0"],
             ["{cyan}{{end}A/C PERFORM", "MEDICAL{cyan}}{end}"],
             ["\xa0DUE TO", "DUE TO\xa0"],
@@ -42,27 +43,30 @@ class CDUAtcText {
             [`${send ? "*" : "\xa0"}ERASE`],
             ["\xa0ATC MENU", `ATC ${parent ? parent : "TEXT"}\xa0[color]cyan`],
             ["<RETURN", `REQ DISPL${send ? "*" : "\xa0"}[color]cyan`]
-        ], true);
+        ]);
 
         mcdu.leftInputDelay[0] = () => {
             return mcdu.getDelaySwitchPage();
         };
         mcdu.onLeftInput[0] = () => {
-            CDUAtcText.ShowPage1(mcdu, parent, true, false, false, false, false, false);
+            mcdu.requestMessage.Reason = 'DUE TO A/C PERFORMANCE';
+            CDUAtcText.ShowPage1(mcdu, parent, false);
         };
 
         mcdu.leftInputDelay[1] = () => {
             return mcdu.getDelaySwitchPage();
         };
         mcdu.onLeftInput[1] = () => {
-            CDUAtcText.ShowPage1(mcdu, parent, false, false, true, false, false, false);
+            mcdu.requestMessage.Reason = 'DUE TO WEATHER';
+            CDUAtcText.ShowPage1(mcdu, parent, false);
         };
 
         mcdu.leftInputDelay[2] = () => {
             return mcdu.getDelaySwitchPage();
         };
         mcdu.onLeftInput[2] = () => {
-            CDUAtcText.ShowPage1(mcdu, parent, false, false, false, false, true, false);
+            mcdu.requestMessage.Reason = 'DUE TO TURBULENCE';
+            CDUAtcText.ShowPage1(mcdu, parent, false);
         };
 
         mcdu.leftInputDelay[3] = () => {
@@ -71,10 +75,10 @@ class CDUAtcText {
         mcdu.onLeftInput[3] = (value) => {
             if (value === FMCMainDisplay.clrValue || !value) {
                 mcdu.requestMessage.Freetext0 = "";
-                CDUAtcText.ShowPage1(mcdu, parent, perf, med, wx, tech, turb, disc);
+                CDUAtcText.ShowPage1(mcdu, parent, false);
             } else {
                 mcdu.requestMessage.Freetext0 = value;
-                CDUAtcText.ShowPage1(mcdu, parent, perf, med, wx, tech, turb, disc);
+                CDUAtcText.ShowPage1(mcdu, parent, false);
             }
         };
 
@@ -82,16 +86,8 @@ class CDUAtcText {
             return mcdu.getDelaySwitchPage();
         };
         mcdu.onLeftInput[4] = () => {
-            if (!parent) {
-                mcdu.requestMessage = undefined;
-            } else {
-                mcdu.requestMessage.Freetext0 = '';
-                mcdu.requestMessage.Freetext1 = '';
-                mcdu.requestMessage.Freetext2 = '';
-                mcdu.requestMessage.Freetext3 = '';
-                mcdu.requestMessage.Freetext4 = '';
-            }
-            CDUAtcText.ShowPage1(mcdu, parent, false, false, false, false, false, false);
+            mcdu.requestMessage = undefined;
+            CDUAtcText.ShowPage1(mcdu, parent, true);
         };
 
         mcdu.leftInputDelay[5] = () => {
@@ -106,46 +102,53 @@ class CDUAtcText {
             return mcdu.getDelaySwitchPage();
         };
         mcdu.onRightInput[0] = () => {
-            CDUAtcText.ShowPage1(mcdu, parent, false, true, false, false, false, false);
+            mcdu.requestMessage.Reason = 'DUE TO MEDICAL';
+            CDUAtcText.ShowPage1(mcdu, parent, false);
         };
 
         mcdu.rightInputDelay[1] = () => {
             return mcdu.getDelaySwitchPage();
         };
         mcdu.onRightInput[1] = () => {
-            CDUAtcText.ShowPage1(mcdu, parent, false, false, false, true, false, false);
+            mcdu.requestMessage.Reason = 'DUE TO TECHNICAL';
+            CDUAtcText.ShowPage1(mcdu, parent, false);
         };
 
         mcdu.rightInputDelay[2] = () => {
             return mcdu.getDelaySwitchPage();
         };
         mcdu.onRightInput[2] = () => {
-            CDUAtcText.ShowPage1(mcdu, parent, false, false, false, false, false, true);
+            mcdu.requestMessage.Reason = 'AT PILOT DISCRETION';
+            CDUAtcText.ShowPage1(mcdu, parent, false);
         };
 
         mcdu.rightInputDelay[5] = () => {
             return mcdu.getDelaySwitchPage();
         };
         mcdu.onRightInput[5] = () => {
-            if (parent || perf || med || wx || tech || turb || disc || CDUAtcText.SendableMessage(mcdu)) {
+            if (CDUAtcText.SendableMessage(mcdu)) {
                 mcdu.atsuManager.registerMessage(mcdu.requestMessage);
                 mcdu.requestMessage = undefined;
-                CDUAtcText.ShowPage1(mcdu, parent, false, false, false, false, false, false);
+                CDUAtcText.ShowPage1(mcdu, parent, true);
             } else {
-                CDUAtcText.ShowPage1(mcdu, parent, perf, med, wx, tech, turb, disc);
+                CDUAtcText.ShowPage1(mcdu, parent, false);
             }
         };
 
         mcdu.onNextPage = () => {
-            CDUAtcText.ShowPage2(mcdu, parent, perf, med, wx, tech, turb, disc);
+            CDUAtcText.ShowPage2(mcdu, parent, false);
         };
     }
 
-    static ShowPage2(mcdu, parent, perf, med, wx, tech, turb, disc) {
+    static ShowPage2(mcdu, parent, firstCall = true) {
         mcdu.clearDisplay();
 
+        if (firstCall || mcdu.requestMessage === undefined) {
+            mcdu.requestMessage = new Atsu.RequestMessage();
+        }
+
         let send = false;
-        if (parent || perf || med || wx || tech || turb || disc || CDUAtcText.SendableMessage(mcdu)) {
+        if (CDUAtcText.SendableMessage(mcdu)) {
             send = true;
         }
 
@@ -167,7 +170,7 @@ class CDUAtcText {
         }
 
         mcdu.setTemplate([
-            ["TEXT", "2", "2{"],
+            ["TEXT", "2", "2"],
             [""],
             [freetext1],
             [""],
@@ -188,10 +191,10 @@ class CDUAtcText {
         mcdu.onLeftInput[0] = (value) => {
             if (value === FMCMainDisplay.clrValue || !value) {
                 mcdu.requestMessage.Freetext1 = "";
-                CDUAtcText.ShowPage1(mcdu, parent, perf, med, wx, tech, turb, disc);
+                CDUAtcText.ShowPage2(mcdu, parent, false);
             } else {
                 mcdu.requestMessage.Freetext1 = value;
-                CDUAtcText.ShowPage1(mcdu, parent, perf, med, wx, tech, turb, disc);
+                CDUAtcText.ShowPage2(mcdu, parent, false);
             }
         };
 
@@ -201,10 +204,10 @@ class CDUAtcText {
         mcdu.onLeftInput[1] = (value) => {
             if (value === FMCMainDisplay.clrValue || !value) {
                 mcdu.requestMessage.Freetext2 = "";
-                CDUAtcText.ShowPage1(mcdu, parent, perf, med, wx, tech, turb, disc);
+                CDUAtcText.ShowPage2(mcdu, parent, false);
             } else {
                 mcdu.requestMessage.Freetext2 = value;
-                CDUAtcText.ShowPage1(mcdu, parent, perf, med, wx, tech, turb, disc);
+                CDUAtcText.ShowPage2(mcdu, parent, false);
             }
         };
 
@@ -214,10 +217,10 @@ class CDUAtcText {
         mcdu.onLeftInput[2] = (value) => {
             if (value === FMCMainDisplay.clrValue || !value) {
                 mcdu.requestMessage.Freetext3 = "";
-                CDUAtcText.ShowPage1(mcdu, parent, perf, med, wx, tech, turb, disc);
+                CDUAtcText.ShowPage2(mcdu, parent, false);
             } else {
                 mcdu.requestMessage.Freetext3 = value;
-                CDUAtcText.ShowPage1(mcdu, parent, perf, med, wx, tech, turb, disc);
+                CDUAtcText.ShowPage2(mcdu, parent, false);
             }
         };
 
@@ -227,10 +230,10 @@ class CDUAtcText {
         mcdu.onLeftInput[3] = (value) => {
             if (value === FMCMainDisplay.clrValue || !value) {
                 mcdu.requestMessage.Freetext4 = "";
-                CDUAtcText.ShowPage1(mcdu, parent, perf, med, wx, tech, turb, disc);
+                CDUAtcText.ShowPage2(mcdu, parent, false);
             } else {
                 mcdu.requestMessage.Freetext4 = value;
-                CDUAtcText.ShowPage1(mcdu, parent, perf, med, wx, tech, turb, disc);
+                CDUAtcText.ShowPage2(mcdu, parent, false);
             }
         };
 
@@ -238,16 +241,8 @@ class CDUAtcText {
             return mcdu.getDelaySwitchPage();
         };
         mcdu.onLeftInput[4] = () => {
-            if (!parent) {
-                mcdu.requestMessage = undefined;
-            } else {
-                mcdu.requestMessage.Freetext0 = '';
-                mcdu.requestMessage.Freetext1 = '';
-                mcdu.requestMessage.Freetext2 = '';
-                mcdu.requestMessage.Freetext3 = '';
-                mcdu.requestMessage.Freetext4 = '';
-            }
-            CDUAtcText.ShowPage2(mcdu, parent, false, false, false, false, false, false);
+            mcdu.requestMessage = undefined;
+            CDUAtcText.ShowPage2(mcdu, parent, mcdu.requestMessage === undefined);
         };
 
         mcdu.leftInputDelay[5] = () => {
@@ -262,17 +257,17 @@ class CDUAtcText {
             return mcdu.getDelaySwitchPage();
         };
         mcdu.onRightInput[5] = () => {
-            if (parent || perf || med || wx || tech || turb || disc || CDUAtcText.SendableMessage(mcdu)) {
+            if (CDUAtcText.SendableMessage(mcdu)) {
                 mcdu.atsuManager.registerMessage(mcdu.requestMessage);
                 mcdu.requestMessage = undefined;
-                CDUAtcText.ShowPage2(mcdu, parent, false, false, false, false, false, false);
+                CDUAtcText.ShowPage2(mcdu, parent, true);
             } else {
-                CDUAtcText.ShowPage2(mcdu, parent, perf, med, wx, tech, turb, disc);
+                CDUAtcText.ShowPage2(mcdu, parent, false);
             }
         };
 
         mcdu.onPrevPage = () => {
-            CDUAtcText.ShowPage1(mcdu, parent, perf, med, wx, tech, turb, disc);
+            CDUAtcText.ShowPage1(mcdu, parent, false);
         };
     }
 }

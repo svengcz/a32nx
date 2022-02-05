@@ -323,9 +323,9 @@ class CDUAtcVertRequest {
             return mcdu.getDelaySwitchPage();
         };
         mcdu.onRightInput[0] = (value) => {
-            if (value === FMCMainDisplay.clrValue || !value) {
+            if (value === FMCMainDisplay.clrValue) {
                 data.alt = null;
-            } else {
+            } else if (value) {
                 const error = CDUAtcVertRequest.ValidateAltitude(value);
                 if (!error) {
                     data = CDUAtcVertRequest.CreateDataBlock();
@@ -341,9 +341,9 @@ class CDUAtcVertRequest {
             return mcdu.getDelaySwitchPage();
         };
         mcdu.onRightInput[1] = (value) => {
-            if (value === FMCMainDisplay.clrValue || !value) {
+            if (value === FMCMainDisplay.clrValue) {
                 data.spd = null;
-            } else {
+            } else if (value) {
                 const error = CDUAtcVertRequest.ValidateSpeed(value);
                 if (!error) {
                     data = CDUAtcVertRequest.CreateDataBlock();
@@ -372,10 +372,10 @@ class CDUAtcVertRequest {
             return mcdu.getDelaySwitchPage();
         };
         mcdu.onRightInput[3] = (value) => {
-            if (value === FMCMainDisplay.clrValue || !value) {
+            if (value === FMCMainDisplay.clrValue) {
                 data.spd = null;
                 data.whenSpd = false;
-            } else {
+            } else if (value) {
                 const error = CDUAtcVertRequest.ValidateSpeed(value);
                 if (error) {
                     data = CDUAtcVertRequest.CreateDataBlock();

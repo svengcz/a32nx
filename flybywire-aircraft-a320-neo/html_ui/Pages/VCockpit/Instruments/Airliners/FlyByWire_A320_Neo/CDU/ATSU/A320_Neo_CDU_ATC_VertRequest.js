@@ -555,6 +555,19 @@ class CDUAtcVertRequest {
             CDUAtcMenu.ShowPage1(mcdu);
         };
 
+        mcdu.rightInputDelay[0] = () => {
+            return mcdu.getDelaySwitchPage();
+        };
+        mcdu.onRightInput[0] = (value) => {
+            if (value === FMCMainDisplay.clrValue) {
+                data.vmcDescend = false;
+            } else {
+                data = CDUAtcVertRequest.CreateDataBlock();
+                data.vmcDescend = true;
+            }
+            CDUAtcVertRequest.ShowPage2(mcdu, data);
+        };
+
         mcdu.rightInputDelay[4] = () => {
             return mcdu.getDelaySwitchPage();
         };

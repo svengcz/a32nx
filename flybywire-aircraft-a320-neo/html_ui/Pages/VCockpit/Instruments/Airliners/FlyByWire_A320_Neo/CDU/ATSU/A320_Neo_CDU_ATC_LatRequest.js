@@ -18,29 +18,31 @@ class CDUAtcLatRequest {
 
     static TranslateOffset(offset) {
         let nmUnit = true;
-        let distance = 0;
         let left = false;
+        let distance;
 
-        if (/[LR][0-9]{1,3}(NM|KM)/.test(offset) || /[LR][0-9]{1,3}/.test(offset)) {
+        if (/^[LR][0-9]{1,3}(NM|KM)$/.test(offset) || /^[LR][0-9]{1,3}$/.test(offset)) {
             // format: DNNNKM, DNNNNM, DNNN
 
             // contains not only numbers
-            if (/(?!^\d+$)^.+$/.test(offset.substring(1, 4))) {
-                return false;
+            distance = offset.replace(/NM|KM/, "").replace(/L|R/, "");
+            if (/(?!^\d+$)^.+$/.test(distance)) {
+                return "";
             }
 
-            distance = parseInt(offset.substring(1, 4));
+            distance = parseInt(distance);
             nmUnit = !offset.endsWith("KM");
             left = offset[0] === 'L';
         } else if (/[0-9]{1,3}(NM|KM)[LR]/.test(offset) || /[0-9]{1,3}[LR]/.test(offset)) {
             // format: NNNKMD, NNNNMD, NNND
 
             // contains not only numbers
-            if (/(?!^\d+$)^.+$/.test(offset.substring(0, 3))) {
-                return false;
+            distance = offset.replace(/NM|KM/, "").replace(/L|R/, "");
+            if (/(?!^\d+$)^.+$/.test(distance)) {
+                return "";
             }
 
-            distance = parseInt(offset.substring(0, 3));
+            distance = parseInt(distance);
             nmUnit = !(offset.endsWith("KML") || offset.endsWith("KMR"));
             left = offset[offset.length - 1] === 'L';
         }

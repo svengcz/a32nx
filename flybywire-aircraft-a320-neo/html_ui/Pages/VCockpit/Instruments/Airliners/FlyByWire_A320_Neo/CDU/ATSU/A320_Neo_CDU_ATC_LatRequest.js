@@ -1,4 +1,21 @@
 class CDUAtcLatRequest {
+    static CreateDataBlock() {
+        return {
+            dir: null,
+            wxDev: null,
+            sid: null,
+            offset: null,
+            offsetStart: null,
+            hdg: null,
+            trk: null,
+            backOnTrack: false
+        };
+    }
+
+    static CanSendData(data) {
+        return data.dir || data.wxDev || data.sid || data.offset || data.hdg || data.trk || data.backOnTrack;
+    }
+
     static TranslateOffset(offset) {
         let nmUnit = true;
         let distance = 0;

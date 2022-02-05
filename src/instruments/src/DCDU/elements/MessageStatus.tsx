@@ -92,7 +92,6 @@ export const MessageStatus: React.FC<MessageStatusProps> = ({ message, selectedR
                 {message.Station}
             </text>
             <>
-                (
                 {backgroundRequired
                 && (
                     <Checkerboard
@@ -104,7 +103,6 @@ export const MessageStatus: React.FC<MessageStatusProps> = ({ message, selectedR
                         fill={backgroundColor}
                     />
                 )}
-                )
                 <text className={statusClass} x="3716" y="290">
                     <tspan>{text}</tspan>
                 </text>

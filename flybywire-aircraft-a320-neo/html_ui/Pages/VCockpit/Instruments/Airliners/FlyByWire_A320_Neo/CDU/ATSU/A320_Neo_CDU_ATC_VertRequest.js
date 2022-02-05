@@ -122,7 +122,7 @@ class CDUAtcVertRequest {
                 //CDUAtcLatRequest.CreateMessage(mcdu, dir, wxDev, sid, offset, offsetStart, hdg, trk, backOnTrack);
                 mcdu.atsuManager.registerMessage(mcdu.requestMessage);
                 mcdu.requestMessage = undefined;
-                CDUAtcVertRequest.ShowPage1(mcdu, false);
+                CDUAtcVertRequest.ShowPage2(mcdu);
             }
         };
 

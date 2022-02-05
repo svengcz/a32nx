@@ -2280,24 +2280,30 @@ class FMCMainDisplay extends BaseAirliners {
         let nmUnit = true;
         let distance = 0;
 
-        if (/[LR][0-9]{1,3}(NM|KM)/.test(offset) || /[LR][0-9]{1,3}/.test(offset)) {
+        if (/^[LR][0-9]{1,3}(NM|KM)$/.test(offset) || /^[LR][0-9]{1,3}$/.test(offset)) {
             // format: DNNNKM, DNNNNM, DNNN
             distance = parseInt(offset.substring(1, 4));
             nmUnit = !offset.endsWith("KM");
-        } else if (/[0-9]{1,3}(NM|KM)[LR]/.test(offset) || /[0-9]{1,3}[LR]/.test(offset)) {
+        } else if (/^[0-9]{1,3}(NM|KM)[LR]$/.test(offset) || /^[0-9]{1,3}[LR]$/.test(offset)) {
             // format: NNNKMD, NNNNMD, NNND
             distance = parseInt(offset.substring(0, 3));
             nmUnit = !(offset.endsWith("KML") || offset.endsWith("KMR"));
         } else {
-            return false;
+            return NXSystemMessages.formatError;
         }
 
         // validate the ranges
         if (nmUnit) {
-            return distance >= 1 && distance <= 128;
+            if (distance >= 1 && distance <= 128) {
+                return null;
+            }
         } else {
-            return distance >= 1 && distance <= 256;
+            if (distance >= 1 && distance <= 256) {
+                return null;
+            }
         }
+
+        return NXSystemMessages.entryOutOfRange;
     }
 
     vSpeedsValid() {

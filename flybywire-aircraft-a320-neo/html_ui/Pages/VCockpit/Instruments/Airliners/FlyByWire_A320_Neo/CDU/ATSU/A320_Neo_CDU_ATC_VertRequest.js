@@ -11,6 +11,7 @@ class CDUAtcVertRequest {
             whenSpd: false,
             blockAltLow: null,
             blockAltHigh: null,
+            vmcDescend: false,
             cruise: null,
             spdLow: null,
             spdHigh: null,

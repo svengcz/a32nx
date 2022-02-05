@@ -92,7 +92,7 @@ class CDUAtcVertRequest {
             return mcdu.getDelaySwitchPage();
         };
         mcdu.onLeftInput[4] = () => {
-            CDUAtcVertRequest.ShowPage1(mcdu, false);
+            CDUAtcVertRequest.ShowPage2(mcdu);
         };
 
         mcdu.leftInputDelay[5] = () => {

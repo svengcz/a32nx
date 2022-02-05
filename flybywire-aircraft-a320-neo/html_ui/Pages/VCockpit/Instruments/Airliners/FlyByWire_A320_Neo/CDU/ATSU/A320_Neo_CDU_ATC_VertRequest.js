@@ -232,20 +232,49 @@ class CDUAtcVertRequest {
             mcdu.requestMessage = undefined;
         }
 
+        let clbStart = "[   ]/[   ][color]cyan";
+        if (data.clb) {
+            clbStart = `${data.clb}/${data.startAt ? data.startAt : "[   ]"}[color]cyan`;
+        }
+        let desStart = "[   ]/[   ][color]cyan";
+        if (data.des) {
+            desStart = `${data.des}/${data.startAt ? data.startAt : "[   ]"}[color]cyan`;
+        }
+
+        let alt = "[   ][color]cyan";
+        if (data.alt) {
+            alt = `${data.alt}[color]cyan`;
+        }
+        let spd = "[ ][color]cyan";
+        if (data.spd && !data.whenSpd) {
+            spd = `${data.spd}[color]cyan`;
+        }
+        let spdWhen = "[ ][color]cyan";
+        if (data.spd && data.whenSpd) {
+            spdWhen = `${data.spd}[color]cyan`;
+        }
+
+        let erase = "\xa0ERASE";
+        let reqDisplay = "REQ DISPLAY\xa0[color]cyan";
+        if (CDUAtcVertRequest.CanSendData(data)) {
+            erase = "*ERASE";
+            reqDisplay = "REQ DISPLAY*[color]cyan";
+        }
+
         mcdu.setTemplate([
             ["ATC VERT REQ", "1", "2"],
             ["\xa0CLB TO/START AT", "ALT\xa0"],
-            ["[   ]/[   ][color]cyan", "[   ][color]cyan"],
+            [clbStart, alt],
             ["\xa0DES TO/START AT", "SPD\xa0"],
-            ["[   ]/[   ][color]cyan", "[ ][color]cyan"],
+            [desStart, spd],
             ["---WHEN CAN WE EXPECT---"],
             ["{cyan}{{end}HIGHER ALT", "LOWER ALT{cyan}}{end}"],
             ["", "WHEN CAN SPD\xa0"],
-            ["", "[ ][color]cyan"],
+            ["", spdWhen],
             ["\xa0ALL FIELDS"],
-            ["\xa0ERASE", "ADD TEXT>"],
+            [erase, "ADD TEXT>"],
             ["\xa0ATC MENU", "ATC\xa0[color]cyan"],
-            ["<RETURN", "REQ DISPLAY\xa0[color]cyan"]
+            ["<RETURN", reqDisplay]
         ]);
 
         mcdu.leftInputDelay[0] = () => {

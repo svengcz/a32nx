@@ -501,6 +501,26 @@ class CDUAtcVertRequest {
             CDUAtcVertRequest.ShowPage2(mcdu, data);
         };
 
+        mcdu.leftInputDelay[1] = () => {
+            return mcdu.getDelaySwitchPage();
+        };
+        mcdu.onLeftInput[1] = (value) => {
+            if (value === FMCMainDisplay.clrValue) {
+                if (!data.whenCruise) {
+                    data.cruise = null;
+                }
+            } else if (value) {
+                const error = CDUAtcVertRequest.ValidateAltitude(value);
+                if (error) {
+                    mcdu.addNewMessage(error);
+                } else {
+                    data = CDUAtcVertRequest.CreateDataBlock();
+                    data.cruise = CDUAtcVertRequest.FormatAltitude(value);
+                }
+            }
+            CDUAtcVertRequest.ShowPage2(mcdu, data);
+        };
+
         mcdu.leftInputDelay[4] = () => {
             return mcdu.getDelaySwitchPage();
         };

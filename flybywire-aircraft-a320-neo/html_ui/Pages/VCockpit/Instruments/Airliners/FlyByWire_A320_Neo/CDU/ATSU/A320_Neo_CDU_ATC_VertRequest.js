@@ -248,6 +248,33 @@ class CDUAtcVertRequest {
             ["<RETURN", "REQ DISPLAY\xa0[color]cyan"]
         ]);
 
+        mcdu.leftInputDelay[0] = () => {
+            return mcdu.getDelaySwitchPage();
+        };
+        mcdu.onLeftInput[0] = (value) => {
+            CDUAtcVertRequest.HandleClbDestStart(mcdu, value, data, true);
+        };
+
+        mcdu.leftInputDelay[1] = () => {
+            return mcdu.getDelaySwitchPage();
+        };
+        mcdu.onLeftInput[1] = (value) => {
+            CDUAtcVertRequest.HandleClbDestStart(mcdu, value, data, false);
+        };
+
+        mcdu.leftInputDelay[2] = () => {
+            return mcdu.getDelaySwitchPage();
+        };
+        mcdu.onLeftInput[2] = (value) => {
+            if (value === FMCMainDisplay.clrValue) {
+                data.whenHigher = false;
+            } else {
+                data = CDUAtcVertRequest.CreateDataBlock();
+                data.whenHigher = true;
+            }
+            CDUAtcVertRequest.ShowPage1(mcdu, data);
+        };
+
         mcdu.leftInputDelay[4] = () => {
             return mcdu.getDelaySwitchPage();
         };
@@ -260,6 +287,75 @@ class CDUAtcVertRequest {
         };
         mcdu.onLeftInput[5] = () => {
             CDUAtcMenu.ShowPage1(mcdu);
+        };
+
+        mcdu.rightInputDelay[0] = () => {
+            return mcdu.getDelaySwitchPage();
+        };
+        mcdu.onRightInput[0] = (value) => {
+            if (value === FMCMainDisplay.clrValue || !value) {
+                data.alt = null;
+            } else {
+                const error = CDUAtcVertRequest.ValidateAltitude(value);
+                if (!error) {
+                    data = CDUAtcVertRequest.CreateDataBlock();
+                    data.alt = CDUAtcVertRequest.FormatAltitude(value);
+                } else {
+                    mcdu.addNewMessage(error);
+                }
+            }
+            CDUAtcVertRequest.ShowPage1(mcdu, data);
+        };
+
+        mcdu.rightInputDelay[1] = () => {
+            return mcdu.getDelaySwitchPage();
+        };
+        mcdu.onRightInput[1] = (value) => {
+            if (value === FMCMainDisplay.clrValue || !value) {
+                data.spd = null;
+            } else {
+                const error = CDUAtcVertRequest.ValidateSpeed(value);
+                if (!error) {
+                    data = CDUAtcVertRequest.CreateDataBlock();
+                    data.spd = CDUAtcVertRequest.FormatSpeed(value);
+                } else {
+                    mcdu.addNewMessage(error);
+                }
+            }
+            CDUAtcVertRequest.ShowPage1(mcdu, data);
+        };
+
+        mcdu.rightInputDelay[2] = () => {
+            return mcdu.getDelaySwitchPage();
+        };
+        mcdu.onRightInput[2] = (value) => {
+            if (value === FMCMainDisplay.clrValue) {
+                data.whenLower = false;
+            } else {
+                data = CDUAtcVertRequest.CreateDataBlock();
+                data.whenLower = true;
+            }
+            CDUAtcVertRequest.ShowPage1(mcdu, data);
+        };
+
+        mcdu.rightInputDelay[3] = () => {
+            return mcdu.getDelaySwitchPage();
+        };
+        mcdu.onRightInput[3] = (value) => {
+            if (value === FMCMainDisplay.clrValue || !value) {
+                data.spd = null;
+                data.whenSpd = false;
+            } else {
+                const error = CDUAtcVertRequest.ValidateSpeed(value);
+                if (error) {
+                    data = CDUAtcVertRequest.CreateDataBlock();
+                    data.spd = CDUAtcVertRequest.FormatSpeed(value);
+                    data.whenSpd = true;
+                } else {
+                    mcdu.addNewMessage(NXSystemMessages.formatError);
+                }
+            }
+            CDUAtcVertRequest.ShowPage1(mcdu, data);
         };
 
         mcdu.rightInputDelay[4] = () => {

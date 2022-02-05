@@ -490,20 +490,49 @@ class CDUAtcVertRequest {
             mcdu.requestMessage = undefined;
         }
 
+        let blockAlt = "[   ]/[   ][color]cyan";
+        if (data.blockAltLow && data.blockAltHigh) {
+            blockAlt = `${data.blockAltLow}/${data.blockAltHigh}[color]cyan`;
+        }
+        let crzClimb = "[   ][color]cyan";
+        if (data.cruise && !data.whenCruise) {
+            crzClimb = `${data.cruise}[color]cyan`;
+        }
+        let crzClimbWhen = "[   ][color]cyan";
+        if (data.cruise && data.whenCruise) {
+            crzClimbWhen = `${data.cruise}[color]cyan`;
+        }
+
+        let spdRange = "[ ]/[ ][color]cyan";
+        if (data.spdLow && data.spdHigh && !data.whenSpdRange) {
+            spdRange = `${data.spdLow}/${data.spdHigh}[color]cyan`;
+        }
+        let spdRangeWhen = "[ ]/[ ][color]cyan";
+        if (data.spdLow && data.spdHigh && data.whenSpdRange) {
+            spdRangeWhen = `${data.spdLow}/${data.spdHigh}[color]cyan`;
+        }
+
+        let erase = "\xa0ERASE";
+        let reqDisplay = "REQ DISPLAY\xa0[color]cyan";
+        if (CDUAtcVertRequest.CanSendData(data)) {
+            erase = "*ERASE";
+            reqDisplay = "REQ DISPLAY*[color]cyan";
+        }
+
         mcdu.setTemplate([
             ["ATC VERT REQ", "2", "2"],
             ["\xa0BLOCK ALT", "VMC\xa0"],
-            ["[   ]/[   ][color]cyan", "DESCENT{cyan}}{end}"],
+            [blockAlt, "DESCENT{cyan}}{end}"],
             ["\xa0CRZ CLB TO", "SPD RANGE\xa0"],
-            ["[   ][color]cyan", "[ ]/[ ][color]cyan"],
+            [crzClimb, spdRange],
             [""],
             ["{small}---WHEN CAN WE EXPECT---{end}"],
             ["\xa0CRZ CLB TO", "SPD RANGE\xa0"],
-            ["[   ][color]cyan", "[ ]/[ ][color]cyan"],
+            [crzClimbWhen, spdRangeWhen],
             ["\xa0ALL FIELDS"],
-            ["\xa0ERASE", "ADD TEXT>"],
+            [erase, "ADD TEXT>"],
             ["\xa0ATC MENU", "ATC\xa0[color]cyan"],
-            ["<RETURN", "REQ DISPLAY\xa0[color]cyan"]
+            ["<RETURN", reqDisplay]
         ]);
 
         mcdu.leftInputDelay[0] = () => {

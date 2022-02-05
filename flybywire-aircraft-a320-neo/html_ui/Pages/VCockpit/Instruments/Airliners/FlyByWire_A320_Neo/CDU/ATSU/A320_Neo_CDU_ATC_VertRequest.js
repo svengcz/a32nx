@@ -132,6 +132,99 @@ class CDUAtcVertRequest {
         return value.replace("M", "").replace("KT", "");
     }
 
+    static HandleClbDestStart(mcdu, value, data, climbRequest) {
+        if (value === FMCMainDisplay.clrValue || !value) {
+            if (climbRequest) {
+                data.clb = null;
+            } else {
+                data.des = null;
+            }
+            data.startAt = null;
+        } else {
+            const entries = value.split('/');
+            let updateAlt = false;
+            let altitude = null;
+            let start = null;
+
+            const error = CDUAtcVertRequest.ValidateAltitude(entries[0]);
+            if (!error) {
+                updateAlt = true;
+                altitude = CDUAtcVertRequest.FormatAltitude(entries[0]);
+                entries.shift();
+            }
+
+            if (entries.length !== 0) {
+                const startingPoint = entries.join("/");
+
+                mcdu.waypointType(mcdu, startingPoint).then((type) => {
+                    if (altitude || (data.clb && climbRequest || data.des && !climbRequest)) {
+                        switch (type[0]) {
+                            case 0:
+                                start = startingPoint;
+                                break;
+                            case 1:
+                                if (startingPoint.endsWith("Z")) {
+                                    start = startingPoint;
+                                } else {
+                                    start = `${startingPoint}Z`;
+                                }
+                                break;
+                            case 2:
+                                start = startingPoint;
+                                break;
+                            default:
+                                mcdu.addNewMessage(type[1]);
+                                start = null;
+                                if (updateAlt) {
+                                    altitude = null;
+                                }
+                                break;
+                        }
+                    }
+
+                    if (altitude || start) {
+                        if (altitude && start) {
+                            // complete new entry
+                            data = CDUAtcVertRequest.CreateDataBlock();
+                            data.startAt = start;
+                            if (climbRequest) {
+                                data.clb = altitude;
+                            } else {
+                                data.des = altitude;
+                            }
+                        } else if (altitude) {
+                            // update the altitude and keep the start at
+                            const lastStart = data.startAt;
+                            data = CDUAtcVertRequest.CreateDataBlock();
+                            data.startAt = lastStart;
+                            if (climbRequest) {
+                                data.clb = altitude;
+                            } else {
+                                data.des = altitude;
+                            }
+                        } else if (start && (data.clb || data.des)) {
+                            // update start at if clb or des are set
+                            data.startAt = start;
+                        }
+                    }
+
+                    CDUAtcVertRequest.ShowPage1(mcdu, data);
+                });
+            } else if (updateAlt) {
+                data = CDUAtcVertRequest.CreateDataBlock();
+                if (climbRequest) {
+                    data.clb = altitude;
+                } else {
+                    data.des = altitude;
+                }
+            } else if (error) {
+                mcdu.addNewMessage(error);
+            }
+        }
+
+        CDUAtcVertRequest.ShowPage1(mcdu, data);
+    }
+
         mcdu.clearDisplay();
 
         if (mcdu.requestMessage !== undefined && !dataSet) {

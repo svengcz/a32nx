@@ -183,7 +183,7 @@ class CDUAtcText {
             [`${send ? "*" : "\xa0"}ERASE`],
             ["\xa0ATC MENU", `ATC ${parent}\xa0[color]cyan`],
             ["<RETURN", `TEXT DISPL${send ? "*" : "\xa0"}[color]cyan`]
-        ], true);
+        ]);
 
         mcdu.leftInputDelay[0] = () => {
             return mcdu.getDelaySwitchPage();

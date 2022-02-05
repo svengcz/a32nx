@@ -247,6 +247,51 @@ class CDUAtcVertRequest {
         }
     }
 
+    static SameSpeedType(lower, higher) {
+        if (lower[0] === "." && higher[0] === ".") {
+            return true;
+        }
+        if (lower[0] === "." || higher[0] === ".") {
+            return false;
+        }
+        return true;
+    }
+
+    static CompareSpeeds(lower, higher) {
+        if (lower[0] === ".") {
+            return parseInt(lower.substring(1, lower.length)) < parseInt(higher.substring(1, higher.length));
+        }
+        return parseInt(lower) < parseInt(higher);
+    }
+
+    static ValidateSpeedRanges(mcdu, value) {
+        const entries = value.split("/");
+        if (entries.length !== 2) {
+            mcdu.addNewMessage(NXSystemMessages.formatError);
+        } else if (CDUAtcVertRequest.ValidateSpeed(entries[0]) || CDUAtcVertRequest.ValidateSpeed(entries[1])) {
+            let error = CDUAtcVertRequest.ValidateSpeed(entries[0]);
+            if (error) {
+                mcdu.addNewMessage(error);
+            } else {
+                error = CDUAtcVertRequest.ValidateSpeed(entries[1]);
+                mcdu.addNewMessage(error);
+            }
+        } else {
+            const lower = CDUAtcVertRequest.FormatSpeed(entries[0]);
+            const higher = CDUAtcVertRequest.FormatSpeed(entries[1]);
+
+            if (!CDUAtcVertRequest.SameSpeedType(lower, higher)) {
+                mcdu.addNewMessage(NXSystemMessages.formatError);
+            } else if (!CDUAtcVertRequest.CompareSpeeds(lower, higher)) {
+                mcdu.addNewMessage(NXSystemMessages.entryOutOfRange);
+            } else {
+                return [lower, higher];
+            }
+        }
+
+        return [];
+    }
+
     static ShowPage1(mcdu, data = CDUAtcVertRequest.CreateDataBlock()) {
         mcdu.clearDisplay();
 
@@ -564,6 +609,48 @@ class CDUAtcVertRequest {
             } else {
                 data = CDUAtcVertRequest.CreateDataBlock();
                 data.vmcDescend = true;
+            }
+            CDUAtcVertRequest.ShowPage2(mcdu, data);
+        };
+
+        mcdu.rightInputDelay[1] = () => {
+            return mcdu.getDelaySwitchPage();
+        };
+        mcdu.onRightInput[1] = (value) => {
+            if (value === FMCMainDisplay.clrValue) {
+                if (!data.whenSpdRange) {
+                    data.spdLow = null;
+                    data.spdHigh = null;
+                }
+            } else if (value) {
+                const range = CDUAtcVertRequest.ValidateSpeedRanges(mcdu, value);
+                if (range.length === 2) {
+                    data = CDUAtcVertRequest.CreateDataBlock();
+                    data.spdLow = range[0];
+                    data.spdHigh = range[1];
+                }
+            }
+            CDUAtcVertRequest.ShowPage2(mcdu, data);
+        };
+
+        mcdu.rightInputDelay[3] = () => {
+            return mcdu.getDelaySwitchPage();
+        };
+        mcdu.onRightInput[3] = (value) => {
+            if (value === FMCMainDisplay.clrValue) {
+                if (data.whenSpdRange) {
+                    data.spdLow = null;
+                    data.spdHigh = null;
+                    data.whenSpdRange = false;
+                }
+            } else if (value) {
+                const range = CDUAtcVertRequest.ValidateSpeedRanges(mcdu, value);
+                if (range.length === 2) {
+                    data = CDUAtcVertRequest.CreateDataBlock();
+                    data.spdLow = range[0];
+                    data.spdHigh = range[1];
+                    data.whenSpdRange = true;
+                }
             }
             CDUAtcVertRequest.ShowPage2(mcdu, data);
         };

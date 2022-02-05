@@ -266,7 +266,7 @@ class CDUAtcLatRequest {
             return mcdu.getDelaySwitchPage();
         };
         mcdu.onLeftInput[5] = () => {
-            CDUAtcMenu.ShowPage(mcdu);
+            CDUAtcMenu.ShowPage1(mcdu);
         };
 
         mcdu.rightInputDelay[1] = () => {

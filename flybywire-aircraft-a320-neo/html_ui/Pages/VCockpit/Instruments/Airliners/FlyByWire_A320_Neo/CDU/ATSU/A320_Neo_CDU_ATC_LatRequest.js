@@ -32,7 +32,7 @@ class CDUAtcLatRequest {
             mcdu.requestMessage.Request = `REQUEST ${CDUAtcLatRequest.TranslateOffset(wxDev)} OF ROUTE`;
             mcdu.requestMessage.Reason = 'DUE TO WEATHER';
         } else if (sid) {
-            mcdu.requestMessage.Request = `REQUEST ${wxDev} ROUTE`;
+            mcdu.requestMessage.Request = `REQUEST ${sid} ROUTE`;
         } else if (offset) {
             mcdu.requestMessage.Request = `REQUEST ${CDUAtcLatRequest.TranslateOffset(offset)} OF ROUTE START `;
             if (offsetStart) {
@@ -50,7 +50,7 @@ class CDUAtcLatRequest {
             if (hdg === 0) {
                 mcdu.requestMessage.Request = "REQUEST GROUND TRACK 360";
             } else {
-                mcdu.requestMessage.Request = `REQUEST GROUND TRACK ${hdg.toString()}`;
+                mcdu.requestMessage.Request = `REQUEST GROUND TRACK ${trk.toString()}`;
             }
         } else if (backOnTrack) {
             mcdu.requestMessage.Request = "WHEN CAN WE EXPECT BACK ON ROUTE";

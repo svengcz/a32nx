@@ -3,6 +3,9 @@ class CDUAtcText {
         if (mcdu.requestMessage === undefined) {
             return false;
         }
+        if (mcdu.requestMessage.Request !== "" || mcdu.requestMessage.Reason !== "") {
+            return true;
+        }
         if (mcdu.requestMessage.Freetext0 !== "" || mcdu.requestMessage.Freetext1 !== "" || mcdu.requestMessage.Freetext2 !== "") {
             return true;
         }

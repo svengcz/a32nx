@@ -29,7 +29,8 @@ class CDUAtcLatRequest {
         if (dir) {
             mcdu.requestMessage.Request = `REQUEST DIR TO ${dir}`;
         } else if (wxDev) {
-            mcdu.requestMessage.Request = `REQUEST ${CDUAtcLatRequest.TranslateOffset(wxDev)} OF ROUTE DUE TO WEATHER`;
+            mcdu.requestMessage.Request = `REQUEST ${CDUAtcLatRequest.TranslateOffset(wxDev)} OF ROUTE`;
+            mcdu.requestMessage.Reason = 'DUE TO WEATHER';
         } else if (sid) {
             mcdu.requestMessage.Request = `REQUEST ${wxDev} ROUTE`;
         } else if (offset) {

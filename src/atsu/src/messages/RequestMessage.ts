@@ -11,6 +11,8 @@ import { cpdlcToString, wordWrap } from '../Common';
 export class RequestMessage extends CpdlcMessage {
     public Request: string = '';
 
+    public Reason: string = '';
+
     public Freetext0: string = '';
 
     public Freetext1: string = '';
@@ -31,6 +33,7 @@ export class RequestMessage extends CpdlcMessage {
         super.deserialize(jsonData);
 
         this.Request = jsonData.Request;
+        this.Reason = jsonData.Reason;
         this.Freetext0 = jsonData.Freetext0;
         this.Freetext1 = jsonData.Freetext1;
         this.Freetext2 = jsonData.Freetext2;
@@ -40,6 +43,9 @@ export class RequestMessage extends CpdlcMessage {
 
     public serialize(format: AtsuMessageSerializationFormat) {
         let content = this.Request;
+        if (this.Reason !== '') {
+            content += ` ${this.Reason}`;
+        }
         let message = '';
         let freetext = [
             this.Freetext0,

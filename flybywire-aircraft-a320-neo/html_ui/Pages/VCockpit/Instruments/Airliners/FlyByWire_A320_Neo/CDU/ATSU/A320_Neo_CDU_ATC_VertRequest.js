@@ -351,10 +351,6 @@ class CDUAtcVertRequest {
             mcdu.addNewMessage(NXSystemMessages.noAtc);
         }
 
-        if (mcdu.requestMessage !== undefined) {
-            mcdu.requestMessage = undefined;
-        }
-
         let clbStart = "[   ]/[   ][color]cyan";
         if (data.clb) {
             clbStart = `${data.clb}/${data.startAt ? data.startAt : "[   ]"}[color]cyan`;

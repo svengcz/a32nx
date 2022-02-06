@@ -101,9 +101,9 @@ class CDUAtcLatRequest {
         if (data.wxDev) {
             wheaterDeviation = `${data.wxDev}[color]cyan`;
         }
-        let heading = "[ ]°";
+        let heading = "[ ]°[color]cyan";
         if (data.hdg !== null) {
-            heading = `${data.hdg}°[color]white`;
+            heading = `${data.hdg}°[color]cyan`;
         }
         let grdTrack = "[ ]°[color]cyan";
         if (data.trk !== null) {

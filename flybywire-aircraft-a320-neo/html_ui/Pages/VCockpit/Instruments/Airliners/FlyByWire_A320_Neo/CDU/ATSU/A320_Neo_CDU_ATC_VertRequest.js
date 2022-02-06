@@ -29,74 +29,6 @@ class CDUAtcVertRequest {
             data.whenCruise || data.whenSpdRange;
     }
 
-    static ValidateAltitude(value) {
-        if (/^((FL)*[0-9]{1,3})$/.test(value)) {
-            let flightlevel = "";
-
-            if (value.startsWith("FL")) {
-                flightlevel = value.substring(2, value.length);
-            } else {
-                flightlevel = value;
-            }
-
-            // contains not only digits
-            if (/(?!^\d+$)^.+$/.test(flightlevel)) {
-                return NXSystemMessages.formatError;
-            }
-            flightlevel = parseInt(flightlevel);
-
-            if (flightlevel >= 30 && flightlevel <= 410) {
-                return null;
-            }
-            return NXSystemMessages.entryOutOfRange;
-        } else if (/^([0-9]{1,3}(FT|M)|[0-9]{1,5}M|[0-9]{4,5})$/.test(value)) {
-            const feet = value[value.length - 1] !== "M";
-
-            let altitude = value.replace("FT", "").replace("M", "");
-
-            // contains not only digits
-            if (/(?!^\d+$)^.+$/.test(altitude)) {
-                return NXSystemMessages.formatError;
-            }
-            altitude = parseInt(altitude);
-
-            if (feet) {
-                if (altitude >= 0 && altitude <= 25000) {
-                    return null;
-                }
-                return NXSystemMessages.entryOutOfRange;
-            }
-
-            if (altitude >= 0 && altitude <= 12500) {
-                return null;
-            }
-            return NXSystemMessages.entryOutOfRange;
-        }
-
-        return NXSystemMessages.formatError;
-    }
-
-    static FormatAltitude(value) {
-        if (/^((FL)*[0-9]{1,3})$/.test(value)) {
-            if (value.startsWith("FL")) {
-                return value;
-            } else {
-                return `FL${value}`;
-            }
-        } else if (/^([0-9]{1,3}(FT|M)|[0-9]{1,5}M|[0-9]{4,5})$/.test(value)) {
-            const feet = value[value.length - 1] !== "M";
-
-            let altitude = value.replace("FT", "").replace("M", "");
-            if (!feet) {
-                altitude = `${altitude}M`;
-            }
-
-            return altitude;
-        }
-
-        return "";
-    }
-
     static HandleClbDestStart(mcdu, value, data, climbRequest) {
         if (value === FMCMainDisplay.clrValue || !value) {
             if (climbRequest) {
@@ -111,10 +43,10 @@ class CDUAtcVertRequest {
             let altitude = null;
             let start = null;
 
-            const error = CDUAtcVertRequest.ValidateAltitude(entries[0]);
+            const error = mcdu.validateAltitude(entries[0]);
             if (!error) {
                 updateAlt = true;
-                altitude = CDUAtcVertRequest.FormatAltitude(entries[0]);
+                altitude = mcdu.formatAltitude(entries[0]);
                 entries.shift();
             }
 
@@ -360,10 +292,10 @@ class CDUAtcVertRequest {
             if (value === FMCMainDisplay.clrValue) {
                 data.alt = null;
             } else if (value) {
-                const error = CDUAtcVertRequest.ValidateAltitude(value);
+                const error = mcdu.validateAltitude(value);
                 if (!error) {
                     data = CDUAtcVertRequest.CreateDataBlock();
-                    data.alt = CDUAtcVertRequest.FormatAltitude(value);
+                    data.alt = mcdu.formatAltitude(value);
                 } else {
                     mcdu.addNewMessage(error);
                 }
@@ -518,17 +450,17 @@ class CDUAtcVertRequest {
                 const entries = value.split("/");
                 if (entries.length !== 2) {
                     mcdu.addNewMessage(NXSystemMessages.formatError);
-                } else if (CDUAtcVertRequest.ValidateAltitude(entries[0]) || CDUAtcVertRequest.ValidateAltitude(entries[1])) {
-                    let error = CDUAtcVertRequest.ValidateAltitude(entries[0]);
+                } else if (mcdu.validateAltitude(entries[0]) || mcdu.validateAltitude(entries[1])) {
+                    let error = mcdu.validateAltitude(entries[0]);
                     if (error) {
                         mcdu.addNewMessage(error);
                     } else {
-                        error = CDUAtcVertRequest.ValidateAltitude(entries[1]);
+                        error = mcdu.validateAltitude(entries[1]);
                         mcdu.addNewMessage(error);
                     }
                 } else {
-                    const lowerStr = CDUAtcVertRequest.FormatAltitude(entries[0]);
-                    const higherStr = CDUAtcVertRequest.FormatAltitude(entries[1]);
+                    const lowerStr = mcdu.formatAltitude(entries[0]);
+                    const higherStr = mcdu.formatAltitude(entries[1]);
                     const lower = CDUAtcVertRequest.ConvertToFeet(lowerStr);
                     const higher = CDUAtcVertRequest.ConvertToFeet(higherStr);
 
@@ -556,12 +488,12 @@ class CDUAtcVertRequest {
                     data.cruise = null;
                 }
             } else if (value) {
-                const error = CDUAtcVertRequest.ValidateAltitude(value);
+                const error = mcdu.validateAltitude(value);
                 if (error) {
                     mcdu.addNewMessage(error);
                 } else {
                     data = CDUAtcVertRequest.CreateDataBlock();
-                    data.cruise = CDUAtcVertRequest.FormatAltitude(value);
+                    data.cruise = mcdu.formatAltitude(value);
                 }
             }
             CDUAtcVertRequest.ShowPage2(mcdu, data);
@@ -575,12 +507,12 @@ class CDUAtcVertRequest {
                 data.cruise = null;
                 data.whenCruise = false;
             } else if (value) {
-                const error = CDUAtcVertRequest.ValidateAltitude(value);
+                const error = mcdu.validateAltitude(value);
                 if (error) {
                     mcdu.addNewMessage(error);
                 } else {
                     data = CDUAtcVertRequest.CreateDataBlock();
-                    data.cruise = CDUAtcVertRequest.FormatAltitude(value);
+                    data.cruise = mcdu.formatAltitude(value);
                     data.whenCruise = true;
                 }
             }

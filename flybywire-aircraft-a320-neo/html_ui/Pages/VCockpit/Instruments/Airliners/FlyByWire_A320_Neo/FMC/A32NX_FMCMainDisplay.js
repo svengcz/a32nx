@@ -2276,6 +2276,74 @@ class FMCMainDisplay extends BaseAirliners {
         return [-1, NXSystemMessages.formatError];
     }
 
+    validateAltitude(value) {
+        if (/^((FL)*[0-9]{1,3})$/.test(value)) {
+            let flightlevel = "";
+
+            if (value.startsWith("FL")) {
+                flightlevel = value.substring(2, value.length);
+            } else {
+                flightlevel = value;
+            }
+
+            // contains not only digits
+            if (/(?!^\d+$)^.+$/.test(flightlevel)) {
+                return NXSystemMessages.formatError;
+            }
+            flightlevel = parseInt(flightlevel);
+
+            if (flightlevel >= 30 && flightlevel <= 410) {
+                return null;
+            }
+            return NXSystemMessages.entryOutOfRange;
+        } else if (/^([0-9]{1,3}(FT|M)|[0-9]{1,5}M|[0-9]{4,5})$/.test(value)) {
+            const feet = value[value.length - 1] !== "M";
+
+            let altitude = value.replace("FT", "").replace("M", "");
+
+            // contains not only digits
+            if (/(?!^\d+$)^.+$/.test(altitude)) {
+                return NXSystemMessages.formatError;
+            }
+            altitude = parseInt(altitude);
+
+            if (feet) {
+                if (altitude >= 0 && altitude <= 25000) {
+                    return null;
+                }
+                return NXSystemMessages.entryOutOfRange;
+            }
+
+            if (altitude >= 0 && altitude <= 12500) {
+                return null;
+            }
+            return NXSystemMessages.entryOutOfRange;
+        }
+
+        return NXSystemMessages.formatError;
+    }
+
+    formatAltitude(value) {
+        if (/^((FL)*[0-9]{1,3})$/.test(value)) {
+            if (value.startsWith("FL")) {
+                return value;
+            } else {
+                return `FL${value}`;
+            }
+        } else if (/^([0-9]{1,3}(FT|M)|[0-9]{1,5}M|[0-9]{4,5})$/.test(value)) {
+            const feet = value[value.length - 1] !== "M";
+
+            let altitude = value.replace("FT", "").replace("M", "");
+            if (!feet) {
+                altitude = `${altitude}M`;
+            }
+
+            return altitude;
+        }
+
+        return "";
+    }
+
     validOffset(offset) {
         let nmUnit = true;
         let distance = 0;

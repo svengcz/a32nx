@@ -35,37 +35,6 @@ class CDUAtcOtherRequest {
         return retval;
     }
 
-    static ValidateFrequency(value) {
-        // valid frequency range: 118.000 - 136.975
-        if (!/^1[1-3][0-9].[0-9]{2}[0|5]$/.test(value)) {
-            return NXSystemMessages.formatError;
-        }
-
-        const elements = value.split(".");
-        const before = parseInt(elements[0]);
-        if (before < 118 || before > 136) {
-            return NXSystemMessages.entryOutOfRange;
-        }
-
-        // valid 8.33 kHz spacings
-        const frequencySpacingOther = [ "00", "05", "10", "15", "25", "30", "35", "40", "50", "55", "60", "65", "75", "80", "85", "90" ];
-        const frequencySpacingEnd = [ "00", "05", "10", "15", "25", "30", "35", "40", "50", "55", "60", "65", "75" ];
-
-        // validate the correct frequency fraction
-        const twoDigitFraction = elements[1].substring(1, elements[1].length);
-        if (before === 136) {
-            if (frequencySpacingEnd.findIndex((entry) => entry === twoDigitFraction) === -1) {
-                return NXSystemMessages.entryOutOfRange;
-            }
-        } else {
-            if (frequencySpacingOther.findIndex((entry) => entry === twoDigitFraction) === -1) {
-                return NXSystemMessages.entryOutOfRange;
-            }
-        }
-
-        return null;
-    }
-
     static ShowPage(mcdu, data = CDUAtcOtherRequest.CreateDataBlock()) {
         mcdu.clearDisplay();
 
@@ -181,7 +150,7 @@ class CDUAtcOtherRequest {
             if (value === FMCMainDisplay.clrValue) {
                 data.freq = null;
             } else if (value) {
-                const error = CDUAtcOtherRequest.ValidateFrequency(value);
+                const error = mcdu.validateFrequency(value);
                 if (error) {
                     mcdu.addNewMessage(error);
                 } else {

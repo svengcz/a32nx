@@ -390,10 +390,6 @@ class CDUAtcVertRequest {
             mcdu.addNewMessage(NXSystemMessages.noAtc);
         }
 
-        if (mcdu.requestMessage !== undefined) {
-            mcdu.requestMessage = undefined;
-        }
-
         let blockAlt = "[   ]/[   ][color]cyan";
         if (data.blockAltLow && data.blockAltHigh) {
             blockAlt = `${data.blockAltLow}/${data.blockAltHigh}[color]cyan`;

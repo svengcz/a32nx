@@ -183,7 +183,6 @@ class FMCMainDisplay extends BaseAirliners {
         this.pdcMessage = undefined;
         this.dclMessage = undefined;
         this.oclMessage = undefined;
-        this.requestMessage = undefined;
     }
 
     Init() {
@@ -515,7 +514,6 @@ class FMCMainDisplay extends BaseAirliners {
         this.pdcMessage = undefined;
         this.dclMessage = undefined;
         this.oclMessage = undefined;
-        this.requestMessage = undefined;
 
         // Reset SimVars
         SimVar.SetSimVarValue("L:AIRLINER_V1_SPEED", "Knots", NaN);

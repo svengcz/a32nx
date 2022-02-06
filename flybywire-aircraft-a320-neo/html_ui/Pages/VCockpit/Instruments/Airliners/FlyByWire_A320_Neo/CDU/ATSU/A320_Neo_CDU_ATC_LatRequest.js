@@ -19,6 +19,10 @@ class CDUAtcLatRequest {
         return data.dir || data.wxDev || data.sid || data.offset || data.hdg || data.trk || data.backOnTrack;
     }
 
+    static CanEraseData(data) {
+        return data.dir || data.wxDev || data.sid || data.offset || data.hdg || data.trk || data.backOnTrack;
+    }
+
     static TranslateOffset(offset) {
         let nmUnit = true;
         let left = false;
@@ -134,8 +138,10 @@ class CDUAtcLatRequest {
         let erase = "\xa0ERASE";
         let reqDisplay = "REQ DISPL\xa0[color]cyan";
         if (CDUAtcLatRequest.CanSendData(mcdu, data)) {
-            erase = "*ERASE";
             reqDisplay = "REQ DISPL*[color]cyan";
+        }
+        if (CDUAtcLatRequest.CanEraseData(data)) {
+            erase = "*ERASE";
         }
 
         mcdu.setTemplate([

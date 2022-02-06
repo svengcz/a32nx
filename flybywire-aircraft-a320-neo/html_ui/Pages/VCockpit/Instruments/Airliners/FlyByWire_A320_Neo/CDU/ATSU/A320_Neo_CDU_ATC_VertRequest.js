@@ -26,7 +26,13 @@ class CDUAtcVertRequest {
         }
         return data.clb || data.des || data.startAt || data.alt || data.spd || data.whenHigher || data.whenLower ||
             data.whenSpd || data.blockAltLow || data.blockAltHigh || data.cruise || data.spdLow || data.spdHigh ||
-            data.whenCruise || data.whenSpdRange;
+            data.whenCruise || data.whenSpdRange || data.vmcDescend;
+    }
+
+    static CanEraseData(data) {
+        return data.clb || data.des || data.startAt || data.alt || data.spd || data.whenHigher || data.whenLower ||
+            data.whenSpd || data.blockAltLow || data.blockAltHigh || data.cruise || data.spdLow || data.spdHigh ||
+            data.whenCruise || data.whenSpdRange || data.vmcDescend;
     }
 
     static HandleClbDestStart(mcdu, value, data, climbRequest) {
@@ -224,8 +230,10 @@ class CDUAtcVertRequest {
         let erase = "\xa0ERASE";
         let reqDisplay = "REQ DISPLAY\xa0[color]cyan";
         if (CDUAtcVertRequest.CanSendData(mcdu, data)) {
-            erase = "*ERASE";
             reqDisplay = "REQ DISPLAY*[color]cyan";
+        }
+        if (CDUAtcVertRequest.CanEraseData(data)) {
+            erase = "*ERASE";
         }
 
         mcdu.setTemplate([
@@ -415,8 +423,10 @@ class CDUAtcVertRequest {
         let erase = "\xa0ERASE";
         let reqDisplay = "REQ DISPLAY\xa0[color]cyan";
         if (CDUAtcVertRequest.CanSendData(mcdu, data)) {
-            erase = "*ERASE";
             reqDisplay = "REQ DISPLAY*[color]cyan";
+        }
+        if (CDUAtcVertRequest.CanEraseData(data)) {
+            erase = "*ERASE";
         }
 
         mcdu.setTemplate([

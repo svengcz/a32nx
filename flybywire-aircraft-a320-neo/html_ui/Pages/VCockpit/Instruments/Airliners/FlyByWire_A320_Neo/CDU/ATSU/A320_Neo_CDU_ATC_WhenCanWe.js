@@ -18,6 +18,10 @@ class CDUAtcWhenCanWe {
         return data.spd || data.whenLower || data.whenHigher || data.cruise || data.spdLow || data.spdHigh || data.backOnRoute;
     }
 
+    static CanEraseData(data) {
+        return data.spd || data.whenLower || data.whenHigher || data.cruise || data.spdLow || data.spdHigh || data.backOnRoute;
+    }
+
     static CreateMessage(data) {
         const retval = new Atsu.RequestMessage();
 
@@ -63,8 +67,10 @@ class CDUAtcWhenCanWe {
         let erase = "\xa0ERASE";
         let reqDisplay = "REQ DISPLAY\xa0[color]cyan";
         if (CDUAtcWhenCanWe.CanSendData(mcdu, data)) {
-            erase = "*ERASE";
             reqDisplay = "REQ DISPLAY*[color]cyan";
+        }
+        if (CDUAtcWhenCanWe.CanEraseData(data)) {
+            erase = "*ERASE";
         }
 
         mcdu.setTemplate([

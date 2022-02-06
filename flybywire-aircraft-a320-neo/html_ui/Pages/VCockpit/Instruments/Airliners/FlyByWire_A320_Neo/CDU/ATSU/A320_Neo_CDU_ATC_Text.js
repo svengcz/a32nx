@@ -25,6 +25,14 @@ class CDUAtcText {
         return freetext.length !== 0;
     }
 
+    static CanEraseData(data) {
+        if (data.performance || data.weather || data.turbulence || data.medical || data.technical || data.discretion) {
+            return true;
+        }
+        const freetext = data.freetext.filter((n) => n);
+        return freetext.length !== 0;
+    }
+
     static CreateMessage(message, data) {
         let retval = message;
         let reason = true;
@@ -64,9 +72,13 @@ class CDUAtcText {
             mcdu.addNewMessage(NXSystemMessages.noAtc);
         }
 
-        let send = false;
+        let erase = "\xa0ERASE";
+        let reqDisplay = "REQ DISPL\xa0[color]cyan";
         if (CDUAtcText.CanSendData(mcdu, message, data)) {
-            send = true;
+            reqDisplay = "REQ DISPL*[color]cyan";
+        }
+        if (CDUAtcText.CanEraseData(data)) {
+            erase = "*ERASE";
         }
 
         let freetext = "[\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0][color]cyan";
@@ -85,9 +97,9 @@ class CDUAtcText {
             ["---------FREE TEXT---------"],
             [freetext],
             ["\xa0ALL FIELDS"],
-            [`${send ? "*" : "\xa0"}ERASE`],
+            [erase],
             ["\xa0ATC MENU", `ATC ${parent ? parent : "TEXT"}\xa0[color]cyan`],
-            ["<RETURN", `REQ DISPL${send ? "*" : "\xa0"}[color]cyan`]
+            ["<RETURN", reqDisplay]
         ]);
 
         mcdu.leftInputDelay[0] = () => {
@@ -233,11 +245,6 @@ class CDUAtcText {
             mcdu.addNewMessage(NXSystemMessages.noAtc);
         }
 
-        let send = false;
-        if (CDUAtcText.CanSendData(mcdu, message, data)) {
-            send = true;
-        }
-
         let freetext1 = "[\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0][color]cyan";
         if (data.freetext[1] !== "") {
             freetext1 = data.freetext[1];
@@ -255,6 +262,15 @@ class CDUAtcText {
             freetext4 = data.freetext[4];
         }
 
+        let erase = "\xa0ERASE";
+        let reqDisplay = "REQ DISPL\xa0[color]cyan";
+        if (CDUAtcText.CanSendData(mcdu, message, data)) {
+            reqDisplay = "REQ DISPL*[color]cyan";
+        }
+        if (CDUAtcText.CanEraseData(data)) {
+            erase = "*ERASE";
+        }
+
         mcdu.setTemplate([
             ["TEXT", "2", "2"],
             [""],
@@ -266,9 +282,9 @@ class CDUAtcText {
             [""],
             [freetext4],
             ["\xa0ALL FIELDS"],
-            [`${send ? "*" : "\xa0"}ERASE`],
+            [erase],
             ["\xa0ATC MENU", `ATC ${parent}\xa0[color]cyan`],
-            ["<RETURN", `TEXT DISPL${send ? "*" : "\xa0"}[color]cyan`]
+            ["<RETURN", reqDisplay]
         ]);
 
         mcdu.leftInputDelay[0] = () => {

@@ -15,7 +15,7 @@ class CDUAtcMenu {
             [""],
             ["<CONNECTION", ""],
             ["\xa0ATSU DLK"],
-            ["<RETURN", "EMERGENCY>[color]inop"]
+            ["<RETURN", "EMERGENCY>[color]amber"]
         ]);
 
         mcdu.leftInputDelay[0] = () => {
@@ -85,7 +85,7 @@ class CDUAtcMenu {
             return mcdu.getDelaySwitchPage();
         };
         mcdu.onRightInput[5] = () => {
-            //CDUAtcEmergency.ShowPage(mcdu);
+            CDUAtcEmergency.ShowPage1(mcdu);
         };
 
         mcdu.onPrevPage = () => {

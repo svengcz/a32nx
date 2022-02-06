@@ -7,7 +7,7 @@ class CDUAtcDepartReq {
             mcdu.dclMessage = new Atsu.DclMessage();
 
             if (mcdu.atsuManager.atc.currentStation() === '') {
-                mcdu.addNewMessage(NXFictionalMessages.noAtc);
+                mcdu.addNewMessage(NXSystemMessages.noAtc);
             }
         }
 
@@ -120,7 +120,7 @@ class CDUAtcDepartReq {
         };
         mcdu.onRightInput[5] = () => {
             if (mcdu.atsuManager.atc.currentStation() === '') {
-                mcdu.addNewMessage(NXFictionalMessages.noAtc);
+                mcdu.addNewMessage(NXSystemMessages.noAtc);
                 return;
             }
 

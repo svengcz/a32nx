@@ -234,7 +234,7 @@ class CDUAtcOceanicReq {
         };
         mcdu.onRightInput[5] = () => {
             if (mcdu.atsuManager.atc().currentStation() === '') {
-                mcdu.addNewMessage(NXFictionalMessages.noAtc);
+                mcdu.addNewMessage(NXSystemMessages.noAtc);
                 return;
             }
 

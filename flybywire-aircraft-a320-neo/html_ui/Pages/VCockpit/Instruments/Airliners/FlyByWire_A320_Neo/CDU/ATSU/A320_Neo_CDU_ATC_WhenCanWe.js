@@ -1,0 +1,117 @@
+class CDUAtcWhenCanWe {
+    static CreateDataBlock() {
+        return {
+            spd: null,
+            whenHigher: false,
+            whenLower: false,
+            cruise: null,
+            spdLow: null,
+            spdHigh: null,
+            backOnRoute: false
+        };
+    }
+
+    static CanSendData(mcdu, data) {
+        if (mcdu.atsuManager.atc.currentStation() === "") {
+            return false;
+        }
+        return data.spd || data.whenLower || data.whenHigher || data.cruise || data.spdLow || data.spdHigh || data.backOnRoute;
+    }
+
+    static ShowPage(mcdu, data = CDUAtcWhenCanWe.CreateDataBlock()) {
+        mcdu.clearDisplay();
+
+        if (mcdu.atsuManager.atc.currentStation() === "") {
+            mcdu.addNewMessage(NXSystemMessages.noAtc);
+        }
+
+        let crzClimb = "[   ][color]cyan";
+        if (data.cruise) {
+            crzClimb = `${data.cruise}[color]cyan`;
+        }
+        let spd = "[ ][color]cyan";
+        if (data.spd) {
+            spd = `${data.spd}[color]cyan`;
+        }
+        let spdRange = "[ ]/[ ][color]cyan";
+        if (data.spdLow && data.spdHigh) {
+            spdRange = `${data.spdLow}/${data.spdHigh}[color]cyan`;
+        }
+
+        let erase = "\xa0ERASE";
+        let reqDisplay = "REQ DISPLAY\xa0[color]cyan";
+        if (CDUAtcWhenCanWe.CanSendData(mcdu, data)) {
+            erase = "*ERASE";
+            reqDisplay = "REQ DISPLAY*[color]cyan";
+        }
+
+        mcdu.setTemplate([
+            ["WHEN CAN WE\nEXPECT"],
+            [""],
+            ["{cyan}{{end}HIGHER ALT", "LOWER ALT{cyan}}{end}"],
+            ["\xa0CRZ CLB TO", "SPEED\xa0"],
+            [crzClimb, spd],
+            ["", "SPEED RANGE\xa0"],
+            ["", spdRange],
+            [""],
+            ["", "BACK ON ROUTE{cyan}}{end}"],
+            ["\xa0ALL FIELDS"],
+            [erase, "ADD TEXT>"],
+            ["\xa0ATC MENU", "ATC\xa0[color]cyan"],
+            ["<RETURN", reqDisplay]
+        ]);
+
+        mcdu.leftInputDelay[0] = () => {
+            return mcdu.getDelaySwitchPage();
+        };
+        mcdu.onLeftInput[0] = (value) => {
+            if (value === FMCMainDisplay.clrValue) {
+                data.whenHigher = false;
+            } else {
+                data = CDUAtcWhenCanWe.CreateDataBlock();
+                data.whenHigher = true;
+            }
+            CDUAtcWhenCanWe.ShowPage(mcdu, data);
+        };
+
+        mcdu.leftInputDelay[4] = () => {
+            return mcdu.getDelaySwitchPage();
+        };
+        mcdu.onLeftInput[4] = () => {
+            CDUAtcWhenCanWe.ShowPage(mcdu);
+        };
+
+        mcdu.leftInputDelay[5] = () => {
+            return mcdu.getDelaySwitchPage();
+        };
+        mcdu.onLeftInput[5] = () => {
+            CDUAtcMenu.ShowPage1(mcdu);
+        };
+
+        mcdu.rightInputDelay[0] = () => {
+            return mcdu.getDelaySwitchPage();
+        };
+        mcdu.onRightInput[0] = (value) => {
+            if (value === FMCMainDisplay.clrValue) {
+                data.whenLower = false;
+            } else {
+                data = CDUAtcWhenCanWe.CreateDataBlock();
+                data.whenLower = true;
+            }
+            CDUAtcWhenCanWe.ShowPage(mcdu, data);
+        };
+
+        mcdu.rightInputDelay[3] = () => {
+            return mcdu.getDelaySwitchPage();
+        };
+        mcdu.onRightInput[3] = (value) => {
+            if (value === FMCMainDisplay.clrValue) {
+                data.backOnRoute = false;
+            } else {
+                data = CDUAtcWhenCanWe.CreateDataBlock();
+                data.backOnRoute = true;
+            }
+            CDUAtcWhenCanWe.ShowPage(mcdu, data);
+        };
+    }
+}

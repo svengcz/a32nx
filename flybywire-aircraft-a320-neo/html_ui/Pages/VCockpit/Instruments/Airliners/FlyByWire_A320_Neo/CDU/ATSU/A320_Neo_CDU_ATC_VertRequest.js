@@ -514,22 +514,22 @@ class CDUAtcVertRequest {
             return mcdu.getDelaySwitchPage();
         };
         mcdu.onRightInput[4] = () => {
-            // TODO
-            //if (dataSet) {
-            //    CDUAtcLatRequest.CreateMessage(mcdu, dir, wxDev, sid, offset, offsetStart, hdg, trk, backOnTrack);
-            //}
-            CDUAtcText.ShowPage1(mcdu, "REQ", false);
+            let message = null;
+            if (CDUAtcVertRequest.CanSendData(mcdu, data)) {
+                message = CDUAtcVertRequest.CreateMessage(data);
+            }
+            CDUAtcText.ShowPage1(mcdu, "REQ", message);
         };
 
         mcdu.rightInputDelay[5] = () => {
             return mcdu.getDelaySwitchPage();
         };
         mcdu.onRightInput[5] = () => {
-            if (dataSet) {
-                // TODO
-                //CDUAtcLatRequest.CreateMessage(mcdu, dir, wxDev, sid, offset, offsetStart, hdg, trk, backOnTrack);
-                mcdu.atsuManager.registerMessage(mcdu.requestMessage);
-                mcdu.requestMessage = undefined;
+            if (CDUAtcVertRequest.CanSendData(mcdu, data)) {
+                const message = CDUAtcVertRequest.CreateMessage(data);
+                if (message) {
+                    mcdu.atsuManager.registerMessage(message);
+                }
                 CDUAtcVertRequest.ShowPage1(mcdu);
             }
         };

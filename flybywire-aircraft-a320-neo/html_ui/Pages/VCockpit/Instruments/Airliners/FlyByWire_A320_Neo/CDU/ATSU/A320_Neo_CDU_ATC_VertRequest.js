@@ -235,10 +235,12 @@ class CDUAtcVertRequest {
             lowerAlt = "LOWER ALT\xa0[color]cyan";
         }
 
+        let text = "ADD TEXT\xa0";
         let erase = "\xa0ERASE";
         let reqDisplay = "REQ DISPLAY\xa0[color]cyan";
         if (CDUAtcVertRequest.CanSendData(mcdu, data)) {
             reqDisplay = "REQ DISPLAY*[color]cyan";
+            text = "ADD TEXT>";
         }
         if (CDUAtcVertRequest.CanEraseData(data)) {
             erase = "*ERASE";
@@ -255,7 +257,7 @@ class CDUAtcVertRequest {
             ["", "WHEN CAN SPD\xa0"],
             ["", spdWhen],
             ["\xa0ALL FIELDS"],
-            [erase, "ADD TEXT>"],
+            [erase, text],
             ["\xa0ATC MENU", "ATC\xa0[color]cyan"],
             ["<RETURN", reqDisplay]
         ]);
@@ -377,8 +379,8 @@ class CDUAtcVertRequest {
             let message = null;
             if (CDUAtcVertRequest.CanSendData(mcdu, data)) {
                 message = CDUAtcVertRequest.CreateMessage(data);
+                CDUAtcText.ShowPage1(mcdu, "REQ", message);
             }
-            CDUAtcText.ShowPage1(mcdu, "REQ", message);
         };
 
         mcdu.rightInputDelay[5] = () => {
@@ -434,10 +436,12 @@ class CDUAtcVertRequest {
             vmcDesc = "DESCENT\xa0[color]cyan";
         }
 
+        let text = "ADD TEXT\xa0";
         let erase = "\xa0ERASE";
         let reqDisplay = "REQ DISPLAY\xa0[color]cyan";
         if (CDUAtcVertRequest.CanSendData(mcdu, data)) {
             reqDisplay = "REQ DISPLAY*[color]cyan";
+            text = "ADD TEXT>";
         }
         if (CDUAtcVertRequest.CanEraseData(data)) {
             erase = "*ERASE";
@@ -454,7 +458,7 @@ class CDUAtcVertRequest {
             ["\xa0CRZ CLB TO", "SPD RANGE\xa0"],
             [crzClimbWhen, spdRangeWhen],
             ["\xa0ALL FIELDS"],
-            [erase, "ADD TEXT>"],
+            [erase, text],
             ["\xa0ATC MENU", "ATC\xa0[color]cyan"],
             ["<RETURN", reqDisplay]
         ]);
@@ -615,8 +619,8 @@ class CDUAtcVertRequest {
             let message = null;
             if (CDUAtcVertRequest.CanSendData(mcdu, data)) {
                 message = CDUAtcVertRequest.CreateMessage(data);
+                CDUAtcText.ShowPage1(mcdu, "REQ", message);
             }
-            CDUAtcText.ShowPage1(mcdu, "REQ", message);
         };
 
         mcdu.rightInputDelay[5] = () => {

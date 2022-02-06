@@ -92,6 +92,7 @@ class CDUAtcOtherRequest {
             clearance = "\xa0CLEARANCE[color]cyan";
         }
 
+        let text = "ADD TEXT\xa0";
         let erase = "\xa0ERASE";
         let reqDisplay = "REQ DISPL\xa0[color]cyan";
         if (CDUAtcOtherRequest.CanEraseData(data)) {
@@ -99,6 +100,7 @@ class CDUAtcOtherRequest {
         }
         if (CDUAtcOtherRequest.CanSendData(mcdu, data)) {
             reqDisplay = "REQ DISPL*[color]cyan";
+            text = "ADD TEXT>";
         }
 
         mcdu.setTemplate([
@@ -112,7 +114,7 @@ class CDUAtcOtherRequest {
             [""],
             [""],
             ["\xa0ALL FIELDS"],
-            [erase, "ADD TEXT>"],
+            [erase, text],
             ["\xa0ATC MENU", "ATC\xa0[color]cyan"],
             ["<RETURN", reqDisplay]
         ]);
@@ -199,8 +201,8 @@ class CDUAtcOtherRequest {
             let message = null;
             if (CDUAtcOtherRequest.CanSendData(mcdu, data)) {
                 message = CDUAtcOtherRequest.CreateMessage(data);
+                CDUAtcText.ShowPage1(mcdu, "REQ", message);
             }
-            CDUAtcText.ShowPage1(mcdu, "REQ", message);
         };
 
         mcdu.rightInputDelay[5] = () => {

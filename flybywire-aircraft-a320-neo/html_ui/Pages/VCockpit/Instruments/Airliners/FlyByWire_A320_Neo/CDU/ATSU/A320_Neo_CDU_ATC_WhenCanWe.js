@@ -76,10 +76,12 @@ class CDUAtcWhenCanWe {
             backOnRoute = "BACK ON ROUTE\xa0[color]cyan";
         }
 
+        let text = "ADD TEXT\xa0";
         let erase = "\xa0ERASE";
         let reqDisplay = "REQ DISPLAY\xa0[color]cyan";
         if (CDUAtcWhenCanWe.CanSendData(mcdu, data)) {
             reqDisplay = "REQ DISPLAY*[color]cyan";
+            text = "ADD TEXT>";
         }
         if (CDUAtcWhenCanWe.CanEraseData(data)) {
             erase = "*ERASE";
@@ -96,7 +98,7 @@ class CDUAtcWhenCanWe {
             [""],
             ["", backOnRoute],
             ["\xa0ALL FIELDS"],
-            [erase, "ADD TEXT>"],
+            [erase, text],
             ["\xa0ATC MENU", "ATC\xa0[color]cyan"],
             ["<RETURN", reqDisplay]
         ]);
@@ -217,8 +219,8 @@ class CDUAtcWhenCanWe {
             let message = null;
             if (CDUAtcWhenCanWe.CanSendData(mcdu, data)) {
                 message = CDUAtcWhenCanWe.CreateMessage(data);
+                CDUAtcText.ShowPage1(mcdu, "REQ", message);
             }
-            CDUAtcText.ShowPage1(mcdu, "REQ", message);
         };
 
         mcdu.rightInputDelay[5] = () => {

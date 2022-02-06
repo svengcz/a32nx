@@ -127,7 +127,7 @@ class CDUAtcText {
             ["---------FREE TEXT---------"],
             [freetext],
             ["\xa0ALL FIELDS"],
-            [erase],
+            [erase, "ADD TEXT\xa0[color]cyan"],
             ["\xa0ATC MENU", `ATC ${parent ? parent : "TEXT"}\xa0[color]cyan`],
             ["<RETURN", reqDisplay]
         ]);

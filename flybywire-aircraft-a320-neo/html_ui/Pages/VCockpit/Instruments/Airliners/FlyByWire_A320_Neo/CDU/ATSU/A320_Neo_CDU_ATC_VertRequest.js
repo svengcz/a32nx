@@ -97,45 +97,6 @@ class CDUAtcVertRequest {
         return "";
     }
 
-    static ValidateSpeed(value) {
-        if (/^((M*)\.[0-9]{1,2})$/.test(value)) {
-            // MACH number
-
-            let mach = value.split(".")[1];
-            // contains not only digits
-            if (/(?!^\d+$)^.+$/.test(mach)) {
-                return NXSystemMessages.formatError;
-            }
-            mach = parseInt(mach);
-
-            if (mach >= 61 && mach <= 92) {
-                return null;
-            }
-            return NXSystemMessages.entryOutOfRange;
-        } else if (/^([0-9]{1,3}(KT)*)$/.test(value)) {
-            // knots
-
-            let knots = value.replace("KT", "");
-            // contains not only digits
-            if (/(?!^\d+$)^.+$/.test(knots)) {
-                return NXSystemMessages.formatError;
-            }
-            knots = parseInt(knots);
-
-            if (knots >= 70 && knots <= 350) {
-                return null;
-            }
-            return NXSystemMessages.entryOutOfRange;
-        }
-
-        return NXSystemMessages.formatError;
-    }
-
-    static FormatSpeed(value) {
-        // remove preceeding M and succeeding KT
-        return value.replace("M", "").replace("KT", "");
-    }
-
     static HandleClbDestStart(mcdu, value, data, climbRequest) {
         if (value === FMCMainDisplay.clrValue || !value) {
             if (climbRequest) {
@@ -248,51 +209,6 @@ class CDUAtcVertRequest {
         } else {
             return parseInt(value);
         }
-    }
-
-    static SameSpeedType(lower, higher) {
-        if (lower[0] === "." && higher[0] === ".") {
-            return true;
-        }
-        if (lower[0] === "." || higher[0] === ".") {
-            return false;
-        }
-        return true;
-    }
-
-    static CompareSpeeds(lower, higher) {
-        if (lower[0] === ".") {
-            return parseInt(lower.substring(1, lower.length)) < parseInt(higher.substring(1, higher.length));
-        }
-        return parseInt(lower) < parseInt(higher);
-    }
-
-    static ValidateSpeedRanges(mcdu, value) {
-        const entries = value.split("/");
-        if (entries.length !== 2) {
-            mcdu.addNewMessage(NXSystemMessages.formatError);
-        } else if (CDUAtcVertRequest.ValidateSpeed(entries[0]) || CDUAtcVertRequest.ValidateSpeed(entries[1])) {
-            let error = CDUAtcVertRequest.ValidateSpeed(entries[0]);
-            if (error) {
-                mcdu.addNewMessage(error);
-            } else {
-                error = CDUAtcVertRequest.ValidateSpeed(entries[1]);
-                mcdu.addNewMessage(error);
-            }
-        } else {
-            const lower = CDUAtcVertRequest.FormatSpeed(entries[0]);
-            const higher = CDUAtcVertRequest.FormatSpeed(entries[1]);
-
-            if (!CDUAtcVertRequest.SameSpeedType(lower, higher)) {
-                mcdu.addNewMessage(NXSystemMessages.formatError);
-            } else if (!CDUAtcVertRequest.CompareSpeeds(lower, higher)) {
-                mcdu.addNewMessage(NXSystemMessages.entryOutOfRange);
-            } else {
-                return [lower, higher];
-            }
-        }
-
-        return [];
     }
 
     static CreateMessage(data) {
@@ -462,10 +378,10 @@ class CDUAtcVertRequest {
             if (value === FMCMainDisplay.clrValue) {
                 data.spd = null;
             } else if (value) {
-                const error = CDUAtcVertRequest.ValidateSpeed(value);
+                const error = mcdu.validateSpeed(value);
                 if (!error) {
                     data = CDUAtcVertRequest.CreateDataBlock();
-                    data.spd = CDUAtcVertRequest.FormatSpeed(value);
+                    data.spd = mcdu.formatSpeed(value);
                 } else {
                     mcdu.addNewMessage(error);
                 }
@@ -494,10 +410,10 @@ class CDUAtcVertRequest {
                 data.spd = null;
                 data.whenSpd = false;
             } else if (value) {
-                const error = CDUAtcVertRequest.ValidateSpeed(value);
+                const error = mcdu.validateSpeed(value);
                 if (error) {
                     data = CDUAtcVertRequest.CreateDataBlock();
-                    data.spd = CDUAtcVertRequest.FormatSpeed(value);
+                    data.spd = mcdu.formatSpeed(value);
                     data.whenSpd = true;
                 } else {
                     mcdu.addNewMessage(NXSystemMessages.formatError);
@@ -708,7 +624,7 @@ class CDUAtcVertRequest {
                     data.spdHigh = null;
                 }
             } else if (value) {
-                const range = CDUAtcVertRequest.ValidateSpeedRanges(mcdu, value);
+                const range = mcdu.validateSpeedRanges(value);
                 if (range.length === 2) {
                     data = CDUAtcVertRequest.CreateDataBlock();
                     data.spdLow = range[0];
@@ -729,7 +645,7 @@ class CDUAtcVertRequest {
                     data.whenSpdRange = false;
                 }
             } else if (value) {
-                const range = CDUAtcVertRequest.ValidateSpeedRanges(mcdu, value);
+                const range = mcdu.validateSpeedRanges(value);
                 if (range.length === 2) {
                     data = CDUAtcVertRequest.CreateDataBlock();
                     data.spdLow = range[0];

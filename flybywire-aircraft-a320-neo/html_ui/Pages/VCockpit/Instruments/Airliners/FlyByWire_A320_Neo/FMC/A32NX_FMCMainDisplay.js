@@ -2306,6 +2306,90 @@ class FMCMainDisplay extends BaseAirliners {
         return NXSystemMessages.entryOutOfRange;
     }
 
+    validateSpeed(value) {
+        if (/^((M*)\.[0-9]{1,2})$/.test(value)) {
+            // MACH number
+
+            let mach = value.split(".")[1];
+            // contains not only digits
+            if (/(?!^\d+$)^.+$/.test(mach)) {
+                return NXSystemMessages.formatError;
+            }
+            mach = parseInt(mach);
+
+            if (mach >= 61 && mach <= 92) {
+                return null;
+            }
+            return NXSystemMessages.entryOutOfRange;
+        } else if (/^([0-9]{1,3}(KT)*)$/.test(value)) {
+            // knots
+
+            let knots = value.replace("KT", "");
+            // contains not only digits
+            if (/(?!^\d+$)^.+$/.test(knots)) {
+                return NXSystemMessages.formatError;
+            }
+            knots = parseInt(knots);
+
+            if (knots >= 70 && knots <= 350) {
+                return null;
+            }
+            return NXSystemMessages.entryOutOfRange;
+        }
+
+        return NXSystemMessages.formatError;
+    }
+
+    formatSpeed(value) {
+        // remove preceeding M and succeeding KT
+        return value.replace("M", "").replace("KT", "");
+    }
+
+    sameSpeedType(lower, higher) {
+        if (lower[0] === "." && higher[0] === ".") {
+            return true;
+        }
+        if (lower[0] === "." || higher[0] === ".") {
+            return false;
+        }
+        return true;
+    }
+
+    compareSpeeds(lower, higher) {
+        if (lower[0] === ".") {
+            return parseInt(lower.substring(1, lower.length)) < parseInt(higher.substring(1, higher.length));
+        }
+        return parseInt(lower) < parseInt(higher);
+    }
+
+    validateSpeedRanges(value) {
+        const entries = value.split("/");
+        if (entries.length !== 2) {
+            this.addNewMessage(NXSystemMessages.formatError);
+        } else if (this.validateSpeed(entries[0]) || this.validateSpeed(entries[1])) {
+            let error = this.validateSpeed(entries[0]);
+            if (error) {
+                this.addNewMessage(error);
+            } else {
+                error = this.validateSpeed(entries[1]);
+                this.addNewMessage(error);
+            }
+        } else {
+            const lower = this.formatSpeed(entries[0]);
+            const higher = this.formatSpeed(entries[1]);
+
+            if (!this.sameSpeedType(lower, higher)) {
+                this.addNewMessage(NXSystemMessages.formatError);
+            } else if (!this.compareSpeeds(lower, higher)) {
+                this.addNewMessage(NXSystemMessages.entryOutOfRange);
+            } else {
+                return [lower, higher];
+            }
+        }
+
+        return [];
+    }
+
     vSpeedsValid() {
         return this._v1Checked && this._vRChecked && this._v2Checked ? (
             (!!this.v1Speed && !!this.vRSpeed ? this.v1Speed <= this.vRSpeed : true)

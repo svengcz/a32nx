@@ -81,6 +81,36 @@ class CDUAtcText {
             erase = "*ERASE";
         }
 
+        const acPerform = ["\xa0DUE TO", "{cyan}{{end}A/C PERFORM"];
+        if (data.performance) {
+            acPerform[0] += "[color]cyan";
+            acPerform[1] = "\xa0A/C PERFORM[color]cyan";
+        }
+        const weather = ["\xa0DUE TO", "{cyan}{{end}WEATHER"];
+        if (data.weather) {
+            weather[0] += "[color]cyan";
+            weather[1] = "\xa0WEATHER[color]cyan";
+        }
+        const turbulence = ["\xa0DUE TO", "{cyan}{{end}TURBULENCE"];
+        if (data.turbulence) {
+            turbulence[0] += "[color]cyan";
+            turbulence[1] = "\xa0TURBULENCE[color]cyan";
+        }
+        const medical = ["DUE TO\xa0", "MEDICAL{cyan}}{end}"];
+        if (data.medical) {
+            medical[0] += "[color]cyan";
+            medical[1] = "MEDICAL\xa0[color]cyan";
+        }
+        const technical = ["DUE TO\xa0", "TECHNICAL{cyan}}{end}"];
+        if (data.technical) {
+            technical[0] += "[color]cyan";
+            technical[1] = "TECHNICAL\xa0[color]cyan";
+        }
+        const discretion = ["AT PILOT\xa0", "DISCRETION{cyan}}{end}"];
+        if (data.discretion) {
+            discretion[0] += "[color]cyan";
+            discretion[1] = "DISCRETION\xa0[color]cyan";
+        }
         let freetext = "[\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0][color]cyan";
         if (data.freetext[0] !== "") {
             freetext = data.freetext[0];
@@ -88,12 +118,12 @@ class CDUAtcText {
 
         mcdu.setTemplate([
             ["TEXT", "1", "2"],
-            ["\xa0DUE TO", "DUE TO\xa0"],
-            ["{cyan}{{end}A/C PERFORM", "MEDICAL{cyan}}{end}"],
-            ["\xa0DUE TO", "DUE TO\xa0"],
-            ["{cyan}{{end}WEATHER", "TECHNICAL{cyan}}{end}"],
-            ["\xa0DUE TO", "AT PILOT\xa0"],
-            ["{cyan}{{end}TURBULENCE", "DISCRETION{cyan}}{end}"],
+            [acPerform[0], medical[0]],
+            [acPerform[1], medical[1]],
+            [weather[0], technical[0]],
+            [weather[1], technical[1]],
+            [turbulence[0], discretion[0]],
+            [turbulence[1], discretion[1]],
             ["---------FREE TEXT---------"],
             [freetext],
             ["\xa0ALL FIELDS"],

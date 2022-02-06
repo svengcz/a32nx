@@ -226,6 +226,14 @@ class CDUAtcVertRequest {
         if (data.spd && data.whenSpd) {
             spdWhen = `${data.spd}[color]cyan`;
         }
+        let higherAlt = "{cyan}{{end}HIGHER ALT";
+        if (data.whenHigher) {
+            higherAlt = "\xa0HIGHER ALT[color]cyan";
+        }
+        let lowerAlt = "LOWER ALT{cyan}}{end}";
+        if (data.whenLower) {
+            lowerAlt = "LOWER ALT\xa0[color]cyan";
+        }
 
         let erase = "\xa0ERASE";
         let reqDisplay = "REQ DISPLAY\xa0[color]cyan";
@@ -243,7 +251,7 @@ class CDUAtcVertRequest {
             ["\xa0DES TO/START AT", "SPD\xa0"],
             [desStart, spd],
             ["---WHEN CAN WE EXPECT---"],
-            ["{cyan}{{end}HIGHER ALT", "LOWER ALT{cyan}}{end}"],
+            [higherAlt, lowerAlt],
             ["", "WHEN CAN SPD\xa0"],
             ["", spdWhen],
             ["\xa0ALL FIELDS"],
@@ -419,6 +427,12 @@ class CDUAtcVertRequest {
         if (data.spdLow && data.spdHigh && data.whenSpdRange) {
             spdRangeWhen = `${data.spdLow}/${data.spdHigh}[color]cyan`;
         }
+        let vmc = "VMC\xa0";
+        let vmcDesc = "DESCENT{cyan}}{end}";
+        if (data.vmcDescend) {
+            vmc = "VMC\xa0[color]cyan";
+            vmcDesc = "DESCENT\xa0[color]cyan";
+        }
 
         let erase = "\xa0ERASE";
         let reqDisplay = "REQ DISPLAY\xa0[color]cyan";
@@ -431,8 +445,8 @@ class CDUAtcVertRequest {
 
         mcdu.setTemplate([
             ["ATC VERT REQ", "2", "2"],
-            ["\xa0BLOCK ALT", "VMC\xa0"],
-            [blockAlt, "DESCENT{cyan}}{end}"],
+            ["\xa0BLOCK ALT", vmc],
+            [blockAlt, vmcDesc],
             ["\xa0CRZ CLB TO", "SPD RANGE\xa0"],
             [crzClimb, spdRange],
             [""],

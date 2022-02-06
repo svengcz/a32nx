@@ -63,6 +63,18 @@ class CDUAtcWhenCanWe {
         if (data.spdLow && data.spdHigh) {
             spdRange = `${data.spdLow}/${data.spdHigh}[color]cyan`;
         }
+        let higherAlt = "{cyan}{{end}HIGHER ALT";
+        if (data.whenHigher) {
+            higherAlt = "\xa0HIGHER ALT[color]cyan";
+        }
+        let lowerAlt = "LOWER ALT{cyan}}{end}";
+        if (data.whenLower) {
+            lowerAlt = "LOWER ALT\xa0[color]cyan";
+        }
+        let backOnRoute = "BACK ON ROUTE{cyan}}{end}";
+        if (data.backOnRoute) {
+            backOnRoute = "BACK ON ROUTE\xa0[color]cyan";
+        }
 
         let erase = "\xa0ERASE";
         let reqDisplay = "REQ DISPLAY\xa0[color]cyan";
@@ -76,13 +88,13 @@ class CDUAtcWhenCanWe {
         mcdu.setTemplate([
             ["WHEN CAN WE\nEXPECT"],
             [""],
-            ["{cyan}{{end}HIGHER ALT", "LOWER ALT{cyan}}{end}"],
+            [higherAlt, lowerAlt],
             ["\xa0CRZ CLB TO", "SPEED\xa0"],
             [crzClimb, spd],
             ["", "SPEED RANGE\xa0"],
             ["", spdRange],
             [""],
-            ["", "BACK ON ROUTE{cyan}}{end}"],
+            ["", backOnRoute],
             ["\xa0ALL FIELDS"],
             [erase, "ADD TEXT>"],
             ["\xa0ATC MENU", "ATC\xa0[color]cyan"],

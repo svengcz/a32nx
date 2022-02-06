@@ -134,6 +134,12 @@ class CDUAtcLatRequest {
         if (data.offsetStart) {
             offsetStartPoint = data.offsetStart;
         }
+        let whenCanWe = "WHEN CAN WE EXPECT\xa0";
+        let backOnRoute = "BACK ON ROUTE{cyan}}{end}";
+        if (data.backOnTrack) {
+            backOnRoute = "BACK ON ROUTE\xa0[color]cyan";
+            whenCanWe = "WHEN CAN WE EXPECT\xa0[color]cyan";
+        }
 
         let erase = "\xa0ERASE";
         let reqDisplay = "REQ DISPL\xa0[color]cyan";
@@ -152,8 +158,8 @@ class CDUAtcLatRequest {
             [sidStar, `{cyan}${offsetDistance}/${offsetStartPoint}{end}`],
             ["\xa0HEADING", "GROUND TRK\xa0"],
             [heading, grdTrack],
-            ["", "WHEN CAN WE EXPECT\xa0"],
-            ["", "BACK ON ROUTE{cyan}}{end}"],
+            ["", whenCanWe],
+            ["", backOnRoute],
             ["\xa0ALL FIELDS"],
             [erase, "ADD TEXT>"],
             ["\xa0ATC MENU", "ATC\xa0[color]cyan"],

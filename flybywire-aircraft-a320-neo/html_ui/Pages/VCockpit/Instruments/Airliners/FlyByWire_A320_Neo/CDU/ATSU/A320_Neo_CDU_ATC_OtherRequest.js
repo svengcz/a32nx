@@ -77,6 +77,20 @@ class CDUAtcOtherRequest {
         if (data.freq) {
             frequency = `${data.freq}[color]cyan`;
         }
+        let voice = "\xa0VOICE";
+        let contact = "{cyan}{{end}CONTACT------";
+        if (data.voiceContact) {
+            contact = "\xa0CONTACT------[color]cyan";
+            voice = "\xa0VOICE[color]cyan";
+        }
+        let ownSeparation = "{cyan}{{end}OWN SEPARATION & VMC";
+        if (data.ownSeparation) {
+            ownSeparation = "\xa0OWN SEPARATION & VMC[color]cyan";
+        }
+        let clearance = "{cyan}{{end}CLEARANCE";
+        if (data.clearance) {
+            clearance = "\xa0CLEARANCE[color]cyan";
+        }
 
         let erase = "\xa0ERASE";
         let reqDisplay = "REQ DISPL\xa0[color]cyan";
@@ -89,12 +103,12 @@ class CDUAtcOtherRequest {
 
         mcdu.setTemplate([
             ["ATC OTHER REQ"],
-            ["\xa0VOICE", "FREQ\xa0"],
-            ["{cyan}{{end}CONTACT------", frequency],
+            [voice, "FREQ\xa0"],
+            [contact, frequency],
             [""],
-            ["{cyan}{{end}OWN SEPARATION & VMC"],
+            [ownSeparation],
             [""],
-            ["{cyan}{{end}CLEARANCE"],
+            [clearance],
             [""],
             [""],
             ["\xa0ALL FIELDS"],

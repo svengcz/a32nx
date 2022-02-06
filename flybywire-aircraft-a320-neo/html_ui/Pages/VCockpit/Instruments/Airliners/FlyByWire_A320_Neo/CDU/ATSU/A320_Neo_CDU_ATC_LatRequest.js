@@ -12,7 +12,10 @@ class CDUAtcLatRequest {
         };
     }
 
-    static CanSendData(data) {
+    static CanSendData(mcdu, data) {
+        if (mcdu.atsuManager.atc.currentStation()) {
+            return false;
+        }
         return data.dir || data.wxDev || data.sid || data.offset || data.hdg || data.trk || data.backOnTrack;
     }
 
@@ -93,8 +96,8 @@ class CDUAtcLatRequest {
     static ShowPage(mcdu, data = CDUAtcLatRequest.CreateDataBlock()) {
         mcdu.clearDisplay();
 
-        if (mcdu.requestMessage !== undefined) {
-            mcdu.requestMessage = undefined;
+        if (mcdu.atsuManager.atc.currentStation() === "") {
+            mcdu.addNewMessage(NXSystemMessages.noAtc);
         }
 
         let wheaterDeviation = "{cyan}[  ]{end}";
@@ -128,7 +131,7 @@ class CDUAtcLatRequest {
 
         let erase = "\xa0ERASE";
         let reqDisplay = "REQ DISPL\xa0[color]cyan";
-        if (CDUAtcLatRequest.CanSendData(data)) {
+        if (CDUAtcLatRequest.CanSendData(mcdu, data)) {
             erase = "*ERASE";
             reqDisplay = "REQ DISPL*[color]cyan";
         }
@@ -406,8 +409,8 @@ class CDUAtcLatRequest {
             return mcdu.getDelaySwitchPage();
         };
         mcdu.onRightInput[4] = () => {
-            if (CDUAtcLatRequest.CanSendData(data)) {
-                CDUAtcLatRequest.CreateMessage(mcdu, data);
+            let message = null;
+            if (CDUAtcLatRequest.CanSendData(mcdu, data)) {
             }
             CDUAtcText.ShowPage1(mcdu, "REQ", false);
         };
@@ -416,10 +419,7 @@ class CDUAtcLatRequest {
             return mcdu.getDelaySwitchPage();
         };
         mcdu.onRightInput[5] = () => {
-            if (CDUAtcLatRequest.CanSendData(data)) {
-                CDUAtcLatRequest.CreateMessage(mcdu, data);
-                mcdu.atsuManager.registerMessage(mcdu.requestMessage);
-                mcdu.requestMessage = undefined;
+            if (CDUAtcLatRequest.CanSendData(mcdu, data)) {
                 CDUAtcLatRequest.ShowPage(mcdu);
             }
         };

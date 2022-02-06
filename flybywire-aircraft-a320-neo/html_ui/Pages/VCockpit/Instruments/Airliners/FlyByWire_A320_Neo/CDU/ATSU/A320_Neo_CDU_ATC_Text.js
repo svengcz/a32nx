@@ -15,12 +15,10 @@ class CDUAtcText {
         if (mcdu.atsuManager.atc.currentStation() === "") {
             return false;
         }
-        if (message === undefined) {
-            return false;
-        }
-        if (data.performance || data.weather || data.turbulence || data.medical || data.technical || data.discretion) {
+        if (message !== undefined) {
             return true;
         }
+
         const freetext = data.freetext.filter((n) => n);
         return freetext.length !== 0;
     }

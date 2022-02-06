@@ -13,15 +13,7 @@ export class RequestMessage extends CpdlcMessage {
 
     public Reason: string = '';
 
-    public Freetext0: string = '';
-
-    public Freetext1: string = '';
-
-    public Freetext2: string = '';
-
-    public Freetext3: string = '';
-
-    public Freetext4: string = '';
+    public Freetext: string[] = [];
 
     constructor() {
         super();
@@ -34,11 +26,7 @@ export class RequestMessage extends CpdlcMessage {
 
         this.Request = jsonData.Request;
         this.Reason = jsonData.Reason;
-        this.Freetext0 = jsonData.Freetext0;
-        this.Freetext1 = jsonData.Freetext1;
-        this.Freetext2 = jsonData.Freetext2;
-        this.Freetext3 = jsonData.Freetext3;
-        this.Freetext4 = jsonData.Freetext4;
+        this.Freetext = jsonData.Freetext;
     }
 
     public serialize(format: AtsuMessageSerializationFormat) {
@@ -47,15 +35,7 @@ export class RequestMessage extends CpdlcMessage {
             content += ` ${this.Reason}`;
         }
         let message = '';
-        let freetext = [
-            this.Freetext0,
-            this.Freetext1,
-            this.Freetext2,
-            this.Freetext3,
-            this.Freetext4,
-        ];
-        freetext = freetext.filter((n) => n);
-        content += ` ${freetext.join(' ')}`;
+        content += ` ${this.Freetext.join(' ')}`;
         const lines = wordWrap(content, 25);
 
         if (format === AtsuMessageSerializationFormat.Network) {

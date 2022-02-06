@@ -295,6 +295,55 @@ class CDUAtcVertRequest {
         return [];
     }
 
+    static CreateMessage(data) {
+        const retval = new Atsu.RequestMessage();
+
+        if (data.clb) {
+            retval.Request = `REQUEST CLIMB TO ${data.clb}`;
+            if (data.startAt) {
+                retval.Request += `START AT ${data.startAt}`;
+            }
+        } else if (data.des) {
+            retval.Request = `REQUEST DESCENT TO ${data.des}`;
+            if (data.startAt) {
+                retval.Request += `START AT ${data.startAt}`;
+            }
+        } else if (data.alt) {
+            retval.Request = `REQUEST ${!data.alt.startsWith("FL") ? " ALTITUDE " : ""} ${data.alt}`;
+        } else if (data.spd) {
+            if (data.whenSpd) {
+                retval.Request = `WHEN CAN WE EXPECT SPEED ${data.spd}`;
+            } else {
+                retval.Request = `REQUEST SPEED ${data.spd}`;
+            }
+        } else if (data.whenHigher) {
+            retval.Request = `WHEN CAN WE EXPECT HIGHER ${Simplane.getPressureSelectedMode(Aircraft.A320_NEO) === "STD" ? "FLIGHLEVEL" : "ALTITUDE"}`;
+        } else if (data.whenLower) {
+            retval.Request = `WHEN CAN WE EXPECT LOWER ${Simplane.getPressureSelectedMode(Aircraft.A320_NEO) === "STD" ? "FLIGHLEVEL" : "ALTITUDE"}`;
+        } else if (data.blockAltLow && data.blockAltHigh) {
+            const fl = data.blockAltLow.startsWith("FL");
+            retval.Request = `REQUEST ${fl ? "FLIGHTLEVEL" : "ALTITUDE"} BETWEEN ${data.blockAltLow} AND ${data.blockAltHigh}`;
+        } else if (data.vmcDescend) {
+            retval.Request = "REQUEST VMC DESCENT";
+        } else if (data.cruise) {
+            if (data.whenCruise) {
+                retval.Request = `WHEN CAN WE EXPECT CRUISE CLIMB TO ${data.cruise}`;
+            } else {
+                retval.Request = `REQUEST CRUISE CLIMB TO ${data.cruise}`;
+            }
+        } else if (data.spdLow && data.spdHigh) {
+            if (data.whenSpdRange) {
+                retval.Request = `WHEN CAN WE EXPECT SPEED BETWEEN ${data.spdLow} AND ${data.spdHigh}`;
+            } else {
+                retval.Request = `REQUEST SPEED BETWEEN ${data.spdLow} AND ${data.spdHigh}`;
+            }
+        } else {
+            retval = null;
+        }
+
+        return retval;
+    }
+
     static ShowPage1(mcdu, data = CDUAtcVertRequest.CreateDataBlock()) {
         mcdu.clearDisplay();
 
@@ -699,22 +748,22 @@ class CDUAtcVertRequest {
             return mcdu.getDelaySwitchPage();
         };
         mcdu.onRightInput[4] = () => {
-            // TODO
-            //if (dataSet) {
-            //    CDUAtcLatRequest.CreateMessage(mcdu, dir, wxDev, sid, offset, offsetStart, hdg, trk, backOnTrack);
-            //}
-            CDUAtcText.ShowPage1(mcdu, "REQ", false);
+            let message = null;
+            if (CDUAtcVertRequest.CanSendData(mcdu, data)) {
+                message = CDUAtcVertRequest.CreateMessage(data);
+            }
+            CDUAtcText.ShowPage1(mcdu, "REQ", message);
         };
 
         mcdu.rightInputDelay[5] = () => {
             return mcdu.getDelaySwitchPage();
         };
         mcdu.onRightInput[5] = () => {
-            if (dataSet) {
-                // TODO
-                //CDUAtcLatRequest.CreateMessage(mcdu, dir, wxDev, sid, offset, offsetStart, hdg, trk, backOnTrack);
-                mcdu.atsuManager.registerMessage(mcdu.requestMessage);
-                mcdu.requestMessage = undefined;
+            if (CDUAtcVertRequest.CanSendData(mcdu, data)) {
+                const message = CDUAtcVertRequest.CreateMessage(data);
+                if (message) {
+                    mcdu.atsuManager.registerMessage(message);
+                }
                 CDUAtcVertRequest.ShowPage2(mcdu);
             }
         };

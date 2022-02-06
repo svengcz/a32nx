@@ -57,40 +57,42 @@ class CDUAtcLatRequest {
         return retval;
     }
 
-    static CreateMessage(mcdu, data) {
-        mcdu.requestMessage = new Atsu.RequestMessage();
+    static CreateMessage(data) {
+        const retval = new Atsu.RequestMessage();
 
         if (data.dir) {
-            mcdu.requestMessage.Request = `REQUEST DIR TO ${data.dir}`;
+            retval.Request = `REQUEST DIR TO ${data.dir}`;
         } else if (data.wxDev) {
-            mcdu.requestMessage.Request = `REQUEST ${CDUAtcLatRequest.TranslateOffset(data.wxDev)} OF ROUTE`;
-            mcdu.requestMessage.Reason = 'DUE TO WEATHER';
+            retval.Request = `REQUEST ${CDUAtcLatRequest.TranslateOffset(data.wxDev)} OF ROUTE`;
+            retval.Reason = 'DUE TO WEATHER';
         } else if (data.sid) {
-            mcdu.requestMessage.Request = `REQUEST ${data.sid} ROUTE`;
+            retval.Request = `REQUEST ${data.sid} ROUTE`;
         } else if (data.offset) {
-            mcdu.requestMessage.Request = `REQUEST ${CDUAtcLatRequest.TranslateOffset(data.offset)} OF ROUTE START `;
+            retval.Request = `REQUEST ${CDUAtcLatRequest.TranslateOffset(data.offset)} OF ROUTE START `;
             if (data.offsetStart) {
-                mcdu.requestMessage.Request += ` AT ${data.offsetStart}`;
+                retval.Request += ` AT ${data.offsetStart}`;
             } else {
-                mcdu.requestMessage.Request += ` NOW [${(new Atsu.AtsuTimestamp()).dcduTimestamp()}]`;
+                retval.Request += ` NOW [${(new Atsu.AtsuTimestamp()).dcduTimestamp()}]`;
             }
         } else if (data.hdg) {
             if (data.hdg === 0) {
-                mcdu.requestMessage.Request = "REQUEST HEADING 360";
+                retval.Request = "REQUEST HEADING 360";
             } else {
-                mcdu.requestMessage.Request = `REQUEST HEADING ${data.hdg.toString()}`;
+                retval.Request = `REQUEST HEADING ${data.hdg.toString()}`;
             }
         } else if (data.trk) {
             if (data.trk === 0) {
-                mcdu.requestMessage.Request = "REQUEST GROUND TRACK 360";
+                retval.Request = "REQUEST GROUND TRACK 360";
             } else {
-                mcdu.requestMessage.Request = `REQUEST GROUND TRACK ${data.trk.toString()}`;
+                retval.Request = `REQUEST GROUND TRACK ${data.trk.toString()}`;
             }
         } else if (data.backOnTrack) {
-            mcdu.requestMessage.Request = "WHEN CAN WE EXPECT BACK ON ROUTE";
+            retval.Request = "WHEN CAN WE EXPECT BACK ON ROUTE";
         } else {
-            mcdu.requestMessage = undefined;
+            retval = null;
         }
+
+        return retval;
     }
 
     static ShowPage(mcdu, data = CDUAtcLatRequest.CreateDataBlock()) {
@@ -411,8 +413,9 @@ class CDUAtcLatRequest {
         mcdu.onRightInput[4] = () => {
             let message = null;
             if (CDUAtcLatRequest.CanSendData(mcdu, data)) {
+                message = CDUAtcLatRequest.CreateMessage(data);
             }
-            CDUAtcText.ShowPage1(mcdu, "REQ", false);
+            CDUAtcText.ShowPage1(mcdu, "REQ", message);
         };
 
         mcdu.rightInputDelay[5] = () => {
@@ -420,6 +423,10 @@ class CDUAtcLatRequest {
         };
         mcdu.onRightInput[5] = () => {
             if (CDUAtcLatRequest.CanSendData(mcdu, data)) {
+                const message = CDUAtcLatRequest.CreateMessage(data);
+                if (message) {
+                    mcdu.atsuManager.registerMessage(message);
+                }
                 CDUAtcLatRequest.ShowPage(mcdu);
             }
         };

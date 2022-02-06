@@ -191,5 +191,29 @@ class CDUAtcWhenCanWe {
             }
             CDUAtcWhenCanWe.ShowPage(mcdu, data);
         };
+
+        mcdu.rightInputDelay[4] = () => {
+            return mcdu.getDelaySwitchPage();
+        };
+        mcdu.onRightInput[4] = () => {
+            let message = null;
+            if (CDUAtcWhenCanWe.CanSendData(mcdu, data)) {
+                message = CDUAtcWhenCanWe.CreateMessage(data);
+            }
+            CDUAtcText.ShowPage1(mcdu, "REQ", message);
+        };
+
+        mcdu.rightInputDelay[5] = () => {
+            return mcdu.getDelaySwitchPage();
+        };
+        mcdu.onRightInput[5] = () => {
+            if (CDUAtcWhenCanWe.CanSendData(mcdu, data)) {
+                const message = CDUAtcWhenCanWe.CreateMessage(data);
+                if (message) {
+                    mcdu.atsuManager.registerMessage(message);
+                }
+                CDUAtcWhenCanWe.ShowPage(mcdu);
+            }
+        };
     }
 }

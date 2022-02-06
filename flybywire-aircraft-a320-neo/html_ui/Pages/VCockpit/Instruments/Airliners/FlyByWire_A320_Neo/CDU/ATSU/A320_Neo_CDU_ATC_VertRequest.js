@@ -165,9 +165,9 @@ class CDUAtcVertRequest {
                 retval.Request = `REQUEST SPEED ${data.spd}`;
             }
         } else if (data.whenHigher) {
-            retval.Request = `WHEN CAN WE EXPECT HIGHER ${Simplane.getPressureSelectedMode(Aircraft.A320_NEO) === "STD" ? "FLIGHLEVEL" : "ALTITUDE"}`;
+            retval.Request = `WHEN CAN WE EXPECT HIGHER ${Simplane.getPressureSelectedMode(Aircraft.A320_NEO) === "STD" ? "FLIGHTLEVEL" : "ALTITUDE"}`;
         } else if (data.whenLower) {
-            retval.Request = `WHEN CAN WE EXPECT LOWER ${Simplane.getPressureSelectedMode(Aircraft.A320_NEO) === "STD" ? "FLIGHLEVEL" : "ALTITUDE"}`;
+            retval.Request = `WHEN CAN WE EXPECT LOWER ${Simplane.getPressureSelectedMode(Aircraft.A320_NEO) === "STD" ? "FLIGHTLEVEL" : "ALTITUDE"}`;
         } else if (data.blockAltLow && data.blockAltHigh) {
             const fl = data.blockAltLow.startsWith("FL");
             retval.Request = `REQUEST ${fl ? "FLIGHTLEVEL" : "ALTITUDE"} BETWEEN ${data.blockAltLow} AND ${data.blockAltHigh}`;

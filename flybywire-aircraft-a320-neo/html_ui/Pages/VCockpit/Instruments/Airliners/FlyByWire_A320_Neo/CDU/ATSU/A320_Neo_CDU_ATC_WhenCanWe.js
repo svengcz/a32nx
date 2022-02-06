@@ -74,6 +74,24 @@ class CDUAtcWhenCanWe {
             CDUAtcWhenCanWe.ShowPage(mcdu, data);
         };
 
+        mcdu.leftInputDelay[1] = () => {
+            return mcdu.getDelaySwitchPage();
+        };
+        mcdu.onLeftInput[1] = (value) => {
+            if (value === FMCMainDisplay.clrValue) {
+                data.cruise = null;
+            } else if (value) {
+                const error = mcdu.validateAltitude(value);
+                if (error) {
+                    mcdu.addNewMessage(error);
+                } else {
+                    data = CDUAtcWhenCanWe.CreateDataBlock();
+                    data.cruise = mcdu.formatAltitude(value);
+                }
+            }
+            CDUAtcWhenCanWe.ShowPage(mcdu, data);
+        };
+
         mcdu.leftInputDelay[4] = () => {
             return mcdu.getDelaySwitchPage();
         };
@@ -97,6 +115,44 @@ class CDUAtcWhenCanWe {
             } else {
                 data = CDUAtcWhenCanWe.CreateDataBlock();
                 data.whenLower = true;
+            }
+            CDUAtcWhenCanWe.ShowPage(mcdu, data);
+        };
+
+        mcdu.rightInputDelay[1] = () => {
+            return mcdu.getDelaySwitchPage();
+        };
+        mcdu.onRightInput[1] = (value) => {
+            if (value === FMCMainDisplay.clrValue) {
+                data.spd = null;
+            } else if (value) {
+                const error = mcdu.validateSpeed(value);
+                if (!error) {
+                    data = CDUAtcWhenCanWe.CreateDataBlock();
+                    data.spd = mcdu.formatSpeed(value);
+                } else {
+                    mcdu.addNewMessage(error);
+                }
+            }
+            CDUAtcWhenCanWe.ShowPage(mcdu, data);
+        };
+
+        mcdu.rightInputDelay[2] = () => {
+            return mcdu.getDelaySwitchPage();
+        };
+        mcdu.onRightInput[2] = (value) => {
+            if (value === FMCMainDisplay.clrValue) {
+                if (!data.whenSpdRange) {
+                    data.spdLow = null;
+                    data.spdHigh = null;
+                }
+            } else if (value) {
+                const range = mcdu.validateSpeedRanges(value);
+                if (range.length === 2) {
+                    data = CDUAtcWhenCanWe.CreateDataBlock();
+                    data.spdLow = range[0];
+                    data.spdHigh = range[1];
+                }
             }
             CDUAtcWhenCanWe.ShowPage(mcdu, data);
         };

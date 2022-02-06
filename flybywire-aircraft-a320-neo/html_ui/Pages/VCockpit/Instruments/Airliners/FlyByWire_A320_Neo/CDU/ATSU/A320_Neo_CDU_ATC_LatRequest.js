@@ -13,7 +13,7 @@ class CDUAtcLatRequest {
     }
 
     static CanSendData(mcdu, data) {
-        if (mcdu.atsuManager.atc.currentStation()) {
+        if (mcdu.atsuManager.atc.currentStation() === "") {
             return false;
         }
         return data.dir || data.wxDev || data.sid || data.offset || data.hdg || data.trk || data.backOnTrack;

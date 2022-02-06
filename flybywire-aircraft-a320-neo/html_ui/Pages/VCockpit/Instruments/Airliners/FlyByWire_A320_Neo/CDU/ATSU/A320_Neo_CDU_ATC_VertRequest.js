@@ -20,7 +20,10 @@ class CDUAtcVertRequest {
         };
     }
 
-    static CanSendData(data) {
+    static CanSendData(mcdu, data) {
+        if (mcdu.atsuManager.atc.currentStation() === "") {
+            return false;
+        }
         return data.clb || data.des || data.startAt || data.alt || data.spd || data.whenHigher || data.whenLower ||
             data.whenSpd || data.blockAltLow || data.blockAltHigh || data.cruise || data.spdLow || data.spdHigh ||
             data.whenCruise || data.whenSpdRange;
@@ -295,6 +298,10 @@ class CDUAtcVertRequest {
     static ShowPage1(mcdu, data = CDUAtcVertRequest.CreateDataBlock()) {
         mcdu.clearDisplay();
 
+        if (mcdu.atsuManager.atc.currentStation() === "") {
+            mcdu.addNewMessage(NXSystemMessages.noAtc);
+        }
+
         if (mcdu.requestMessage !== undefined) {
             mcdu.requestMessage = undefined;
         }
@@ -323,7 +330,7 @@ class CDUAtcVertRequest {
 
         let erase = "\xa0ERASE";
         let reqDisplay = "REQ DISPLAY\xa0[color]cyan";
-        if (CDUAtcVertRequest.CanSendData(data)) {
+        if (CDUAtcVertRequest.CanSendData(mcdu, data)) {
             erase = "*ERASE";
             reqDisplay = "REQ DISPLAY*[color]cyan";
         }
@@ -486,6 +493,10 @@ class CDUAtcVertRequest {
     static ShowPage2(mcdu, data = CDUAtcVertRequest.CreateDataBlock()) {
         mcdu.clearDisplay();
 
+        if (mcdu.atsuManager.atc.currentStation() === "") {
+            mcdu.addNewMessage(NXSystemMessages.noAtc);
+        }
+
         if (mcdu.requestMessage !== undefined) {
             mcdu.requestMessage = undefined;
         }
@@ -514,7 +525,7 @@ class CDUAtcVertRequest {
 
         let erase = "\xa0ERASE";
         let reqDisplay = "REQ DISPLAY\xa0[color]cyan";
-        if (CDUAtcVertRequest.CanSendData(data)) {
+        if (CDUAtcVertRequest.CanSendData(mcdu, data)) {
             erase = "*ERASE";
             reqDisplay = "REQ DISPLAY*[color]cyan";
         }

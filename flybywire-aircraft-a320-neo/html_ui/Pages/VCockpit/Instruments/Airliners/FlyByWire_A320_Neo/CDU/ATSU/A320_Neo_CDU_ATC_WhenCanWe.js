@@ -18,6 +18,28 @@ class CDUAtcWhenCanWe {
         return data.spd || data.whenLower || data.whenHigher || data.cruise || data.spdLow || data.spdHigh || data.backOnRoute;
     }
 
+    static CreateMessage(data) {
+        const retval = new Atsu.RequestMessage();
+
+        if (data.spd) {
+            retval.Request = `WHEN CAN WE EXPECT SPEED ${data.spd}`;
+        } else if (data.whenHigher) {
+            retval.Request = `WHEN CAN WE EXPECT HIGHER ${Simplane.getPressureSelectedMode(Aircraft.A320_NEO) === "STD" ? "FLIGHTLEVEL" : "ALTITUDE"}`;
+        } else if (data.whenLower) {
+            retval.Request = `WHEN CAN WE EXPECT LOWER ${Simplane.getPressureSelectedMode(Aircraft.A320_NEO) === "STD" ? "FLIGHTLEVEL" : "ALTITUDE"}`;
+        } else if (data.cruise) {
+            retval.Request = `WHEN CAN WE EXPECT CRUISE CLIMB TO ${data.cruise}`;
+        } else if (data.spdLow && data.spdHigh) {
+            retval.Request = `WHEN CAN WE EXPECT SPEED BETWEEN ${data.spdLow} AND ${data.spdHigh}`;
+        } else if (data.backOnRoute) {
+            retval.Request = "WHEN CAN WE EXPECT BACK ON ROUTE";
+        } else {
+            retval = null;
+        }
+
+        return retval;
+    }
+
     static ShowPage(mcdu, data = CDUAtcWhenCanWe.CreateDataBlock()) {
         mcdu.clearDisplay();
 

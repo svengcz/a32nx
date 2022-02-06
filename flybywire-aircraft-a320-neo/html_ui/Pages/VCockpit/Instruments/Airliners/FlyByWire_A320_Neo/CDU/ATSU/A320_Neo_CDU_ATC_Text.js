@@ -182,8 +182,8 @@ class CDUAtcText {
             } else {
                 const oldFreetext = data.freetext;
                 data = CDUAtcText.CreateDataBlock();
-                data.turbulence = true;
-                data.medical = oldFreetext;
+                data.medical = true;
+                data.freetext = oldFreetext;
             }
             CDUAtcText.ShowPage1(mcdu, parent, message, data);
         };

@@ -2403,6 +2403,44 @@ class FMCMainDisplay extends BaseAirliners {
         return NXSystemMessages.entryOutOfRange;
     }
 
+    translateOffset(offset) {
+        let nmUnit = true;
+        let left = false;
+        let distance;
+
+        if (/^[LR][0-9]{1,3}(NM|KM)$/.test(offset) || /^[LR][0-9]{1,3}$/.test(offset)) {
+            // format: DNNNKM, DNNNNM, DNNN
+
+            // contains not only numbers
+            distance = offset.replace(/NM|KM/, "").replace(/L|R/, "");
+            if (/(?!^\d+$)^.+$/.test(distance)) {
+                return '';
+            }
+
+            distance = parseInt(distance);
+            nmUnit = !offset.endsWith("KM");
+            left = offset[0] === 'L';
+        } else if (/[0-9]{1,3}(NM|KM)[LR]/.test(offset) || /[0-9]{1,3}[LR]/.test(offset)) {
+            // format: NNNKMD, NNNNMD, NNND
+
+            // contains not only numbers
+            distance = offset.replace(/NM|KM/, "").replace(/L|R/, "");
+            if (/(?!^\d+$)^.+$/.test(distance)) {
+                return '';
+            }
+
+            distance = parseInt(distance);
+            nmUnit = !(offset.endsWith("KML") || offset.endsWith("KMR"));
+            left = offset[offset.length - 1] === 'L';
+        }
+
+        let retval = distance.toString();
+        retval += nmUnit ? 'NM ' : 'KM ';
+        retval += left ? 'LEFT' : 'RIGHT';
+
+        return retval;
+    }
+
     validateSpeed(value) {
         if (/^((M*)\.[0-9]{1,2})$/.test(value)) {
             // MACH number

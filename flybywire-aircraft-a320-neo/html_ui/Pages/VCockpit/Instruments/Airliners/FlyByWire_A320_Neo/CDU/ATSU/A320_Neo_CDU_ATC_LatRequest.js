@@ -23,56 +23,18 @@ class CDUAtcLatRequest {
         return data.dir || data.wxDev || data.sid || data.offset || data.hdg || data.trk || data.backOnTrack;
     }
 
-    static TranslateOffset(offset) {
-        let nmUnit = true;
-        let left = false;
-        let distance;
-
-        if (/^[LR][0-9]{1,3}(NM|KM)$/.test(offset) || /^[LR][0-9]{1,3}$/.test(offset)) {
-            // format: DNNNKM, DNNNNM, DNNN
-
-            // contains not only numbers
-            distance = offset.replace(/NM|KM/, "").replace(/L|R/, "");
-            if (/(?!^\d+$)^.+$/.test(distance)) {
-                return "";
-            }
-
-            distance = parseInt(distance);
-            nmUnit = !offset.endsWith("KM");
-            left = offset[0] === 'L';
-        } else if (/[0-9]{1,3}(NM|KM)[LR]/.test(offset) || /[0-9]{1,3}[LR]/.test(offset)) {
-            // format: NNNKMD, NNNNMD, NNND
-
-            // contains not only numbers
-            distance = offset.replace(/NM|KM/, "").replace(/L|R/, "");
-            if (/(?!^\d+$)^.+$/.test(distance)) {
-                return "";
-            }
-
-            distance = parseInt(distance);
-            nmUnit = !(offset.endsWith("KML") || offset.endsWith("KMR"));
-            left = offset[offset.length - 1] === 'L';
-        }
-
-        let retval = distance.toString();
-        retval += nmUnit ? 'NM ' : 'KM ';
-        retval += left ? 'LEFT' : 'RIGHT';
-
-        return retval;
-    }
-
-    static CreateMessage(data) {
+    static CreateMessage(mcdu, data) {
         const retval = new Atsu.RequestMessage();
 
         if (data.dir) {
             retval.Request = `REQUEST DIR TO ${data.dir}`;
         } else if (data.wxDev) {
-            retval.Request = `REQUEST ${CDUAtcLatRequest.TranslateOffset(data.wxDev)} OF ROUTE`;
+            retval.Request = `REQUEST ${mcdu.translateOffset(data.wxDev)} OF ROUTE`;
             retval.Reason = 'DUE TO WEATHER';
         } else if (data.sid) {
             retval.Request = `REQUEST ${data.sid} ROUTE`;
         } else if (data.offset) {
-            retval.Request = `REQUEST ${CDUAtcLatRequest.TranslateOffset(data.offset)} OF ROUTE START `;
+            retval.Request = `REQUEST ${mcdu.translateOffset(data.offset)} OF ROUTE START `;
             if (data.offsetStart) {
                 retval.Request += ` AT ${data.offsetStart}`;
             } else {
@@ -427,7 +389,7 @@ class CDUAtcLatRequest {
         mcdu.onRightInput[4] = () => {
             let message = null;
             if (CDUAtcLatRequest.CanSendData(mcdu, data)) {
-                message = CDUAtcLatRequest.CreateMessage(data);
+                message = CDUAtcLatRequest.CreateMessage(mcdu, data);
                 CDUAtcText.ShowPage1(mcdu, "REQ", message);
             }
         };
@@ -437,7 +399,7 @@ class CDUAtcLatRequest {
         };
         mcdu.onRightInput[5] = () => {
             if (CDUAtcLatRequest.CanSendData(mcdu, data)) {
-                const message = CDUAtcLatRequest.CreateMessage(data);
+                const message = CDUAtcLatRequest.CreateMessage(mcdu, data);
                 if (message) {
                     mcdu.atsuManager.registerMessage(message);
                 }

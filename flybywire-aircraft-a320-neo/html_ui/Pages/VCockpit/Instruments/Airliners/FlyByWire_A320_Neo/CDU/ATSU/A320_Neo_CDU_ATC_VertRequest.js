@@ -379,7 +379,9 @@ class CDUAtcVertRequest {
             let message = null;
             if (CDUAtcVertRequest.CanSendData(mcdu, data)) {
                 message = CDUAtcVertRequest.CreateMessage(data);
-                CDUAtcText.ShowPage1(mcdu, "REQ", message);
+                if (message) {
+                    CDUAtcText.ShowPage1(mcdu, "REQ", message);
+                }
             }
         };
 
@@ -619,7 +621,9 @@ class CDUAtcVertRequest {
             let message = null;
             if (CDUAtcVertRequest.CanSendData(mcdu, data)) {
                 message = CDUAtcVertRequest.CreateMessage(data);
-                CDUAtcText.ShowPage1(mcdu, "REQ", message);
+                if (message) {
+                    CDUAtcText.ShowPage1(mcdu, "REQ", message);
+                }
             }
         };
 

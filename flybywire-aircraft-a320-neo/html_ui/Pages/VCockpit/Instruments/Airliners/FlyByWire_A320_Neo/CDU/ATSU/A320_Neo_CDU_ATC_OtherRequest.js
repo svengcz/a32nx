@@ -170,7 +170,9 @@ class CDUAtcOtherRequest {
             let message = null;
             if (CDUAtcOtherRequest.CanSendData(mcdu, data)) {
                 message = CDUAtcOtherRequest.CreateMessage(data);
-                CDUAtcText.ShowPage1(mcdu, "REQ", message);
+                if (message) {
+                    CDUAtcText.ShowPage1(mcdu, "REQ", message);
+                }
             }
         };
 

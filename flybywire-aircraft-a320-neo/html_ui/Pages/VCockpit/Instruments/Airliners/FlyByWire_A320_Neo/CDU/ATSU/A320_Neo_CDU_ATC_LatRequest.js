@@ -390,7 +390,9 @@ class CDUAtcLatRequest {
             let message = null;
             if (CDUAtcLatRequest.CanSendData(mcdu, data)) {
                 message = CDUAtcLatRequest.CreateMessage(mcdu, data);
-                CDUAtcText.ShowPage1(mcdu, "REQ", message);
+                if (message) {
+                    CDUAtcText.ShowPage1(mcdu, "REQ", message);
+                }
             }
         };
 

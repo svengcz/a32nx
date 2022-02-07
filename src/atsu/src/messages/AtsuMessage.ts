@@ -24,7 +24,8 @@ export enum AtsuMessageType {
     DCL = 7,
     OCL = 8,
     Request = 9,
-    ATC = 10
+    Emergency = 10,
+    ATC = 11
 }
 
 export enum AtsuMessageComStatus {

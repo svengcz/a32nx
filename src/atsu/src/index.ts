@@ -14,6 +14,7 @@ import { AtcSystem } from './AtcSystem';
 import { DclMessage } from './messages/DclMessage';
 import { OclMessage } from './messages/OclMessage';
 import { RequestMessage } from './messages/RequestMessage';
+import { EmergencyMessage } from './messages/EmergencyMessage';
 
 export {
     AtsuStatusCodes,
@@ -38,4 +39,5 @@ export {
     DclMessage,
     OclMessage,
     RequestMessage,
+    EmergencyMessage,
 };

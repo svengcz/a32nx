@@ -71,9 +71,9 @@ class CDUAtcText {
         }
 
         let erase = "\xa0ERASE";
-        let reqDisplay = "REQ DISPL\xa0[color]cyan";
+        let reqDisplay = `${parent ? parent : "TEXT"} DISPL\xa0[color]cyan`;
         if (CDUAtcText.CanSendData(mcdu, message, data)) {
-            reqDisplay = "REQ DISPL*[color]cyan";
+            reqDisplay = `${parent ? parent : "TEXT"} DISPL*[color]cyan`;
         }
         if (CDUAtcText.CanEraseData(data)) {
             erase = "*ERASE";
@@ -126,7 +126,7 @@ class CDUAtcText {
             [freetext],
             ["\xa0ALL FIELDS"],
             [erase, "ADD TEXT\xa0[color]cyan"],
-            ["\xa0ATC MENU", `ATC ${parent ? parent : "TEXT"}\xa0[color]cyan`],
+            ["\xa0ATC MENU", `ATC\xa0[color]cyan`],
             ["<RETURN", reqDisplay]
         ]);
 
@@ -291,9 +291,9 @@ class CDUAtcText {
         }
 
         let erase = "\xa0ERASE";
-        let reqDisplay = "REQ DISPL\xa0[color]cyan";
+        let reqDisplay = `${parent ? parent : "TEXT"} DISPL\xa0[color]cyan`;
         if (CDUAtcText.CanSendData(mcdu, message, data)) {
-            reqDisplay = "REQ DISPL*[color]cyan";
+            reqDisplay = `${parent ? parent : "TEXT"} DISPL*[color]cyan`;
         }
         if (CDUAtcText.CanEraseData(data)) {
             erase = "*ERASE";
@@ -311,7 +311,7 @@ class CDUAtcText {
             [freetext4],
             ["\xa0ALL FIELDS"],
             [erase],
-            ["\xa0ATC MENU", `ATC ${parent}\xa0[color]cyan`],
+            ["\xa0ATC MENU", "ATC\xa0[color]cyan"],
             ["<RETURN", reqDisplay]
         ]);
 

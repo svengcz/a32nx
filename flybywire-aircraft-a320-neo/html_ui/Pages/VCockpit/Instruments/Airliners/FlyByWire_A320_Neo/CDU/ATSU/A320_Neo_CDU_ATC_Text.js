@@ -12,6 +12,9 @@ class CDUAtcText {
     }
 
     static CanSendData(mcdu, message, data) {
+        if (mcdu.atsuManager.atc.currentStation() === "") {
+            return false;
+        }
         if (message !== null) {
             return true;
         }

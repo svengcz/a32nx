@@ -255,9 +255,7 @@ class CDUAtcText {
                 if (prepMessage) {
                     mcdu.atsuManager.registerMessage(prepMessage);
                 }
-                CDUAtcText.ShowPage1(mcdu, parent);
-            } else {
-                CDUAtcText.ShowPage1(mcdu, parent, message, data);
+                CDUAtcText.ShowPage1(mcdu);
             }
         };
 
@@ -386,9 +384,7 @@ class CDUAtcText {
                 if (prepMessage) {
                     mcdu.atsuManager.registerMessage(prepMessage);
                 }
-                CDUAtcText.ShowPage2(mcdu, parent);
-            } else {
-                CDUAtcText.ShowPage2(mcdu, parent, message, data);
+                CDUAtcText.ShowPage2(mcdu);
             }
         };
 

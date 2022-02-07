@@ -6,6 +6,7 @@ import { CpdlcMessage, CpdlcMessageRequestedResponseType, CpdlcMessageResponse }
 import { DclMessage } from '@atsu/messages/DclMessage';
 import { OclMessage } from '@atsu/messages/OclMessage';
 import { RequestMessage } from '@atsu/messages/RequestMessage';
+import { EmergencyMessage } from '@atsu/messages/EmergencyMessage';
 import { OutputButtons } from './elements/OutputButtons';
 import { AffirmNegativeButtons } from './elements/AffirmNegativeButtons';
 import { WilcoUnableButtons } from './elements/WilcoUnableButtons';
@@ -179,6 +180,8 @@ const DCDU: React.FC = () => {
             cpdlcMessage = new OclMessage();
         } else if (serialized.Type === AtsuMessageType.Request) {
             cpdlcMessage = new RequestMessage();
+        } else if (serialized.Type === AtsuMessageType.Emergency) {
+            cpdlcMessage = new EmergencyMessage();
         }
 
         if (cpdlcMessage !== undefined && serialized.UniqueMessageID !== undefined) {

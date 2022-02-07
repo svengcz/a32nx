@@ -16,9 +16,9 @@ class CDUAtcEmergency {
     }
 
     static CanSendData(mcdu, data) {
-        //if (mcdu.atsuManager.atc.currentStation() === "") {
-        //    return false;
-        //}
+        if (mcdu.atsuManager.atc.currentStation() === "") {
+            return false;
+        }
         if (data.mayday || data.panpan) {
             return data.contactVoice || data.descend || data.diversion || data.via || data.frequency || data.climb || data.offset || data.souls || data.endurance;
         }
